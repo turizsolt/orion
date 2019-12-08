@@ -4,5 +4,15 @@
   "main": "index.js",
   "repository": "https://github.com/turizsolt/condorcet.git",
   "author": "turizsolt <turi.zsolt.m@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && mocha build/test"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.6",
+    "@types/mocha": "^5.2.7",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2"
+  }
 }
