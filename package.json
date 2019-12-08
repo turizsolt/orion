@@ -1,0 +1,8 @@
+{
+  "name": "condorcet",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/turizsolt/condorcet.git",
+  "author": "turizsolt <turi.zsolt.m@gmail.com>",
+  "license": "MIT"
+}
