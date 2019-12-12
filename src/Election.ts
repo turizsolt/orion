@@ -28,16 +28,12 @@ export class Election {
         // todo question is it possible to A < B and B = C, C = A ???
         const compare = (a, b) => strongestPathes.cells[b][a] - strongestPathes.cells[a][b];
 
-        // make it more readable
-        const order = Util.simplifyArray(
-            Util.groupSame(
-                Util.sort(
-                    Util.createAscendingVector(this.options.length),
-                    compare
-                ),
-                compare
-            )
-        );
+        const order =
+            Util.simplifyArray(
+            Util.groupSame(compare)(
+            Util.sort(compare)(
+            Util.createAscendingVector(this.options.length
+            ))));
 
         return {
             pairwisePreferences,

@@ -37,7 +37,7 @@ export class Util {
         }
     }
 
-    static groupSame(list:number[], compare) {
+    static groupSame = (compare:(a, b:any) => number) => (list:number[]) => {
         const result = [];
         let pivot = list[0];
         let current = [list[0]];
@@ -54,7 +54,7 @@ export class Util {
         return result;
     }
 
-    static simplifyArray(list:number[][]) {
+    static simplifyArray = (list:number[][]) => {
         return list.map(el => {
             if(el.length === 1) {
                 return el[0];
@@ -65,7 +65,7 @@ export class Util {
         });
     }
 
-    static sort(list:number[], compare) {
+    static sort = (compare:(a, b:any) => number) => (list:number[]) => {
         list.sort(compare);
         return list;
     }
