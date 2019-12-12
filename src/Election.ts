@@ -2,17 +2,18 @@ import { Option } from "./Option";
 import { Vote } from "./Vote";
 import { Util } from "./Util";
 import { Matrix } from "./Matrix";
+import { PreferenceListToMatrix } from "./PreferenceListToMatrix";
 
 export class Election {
     readonly votes = [];
     constructor(readonly name: string, readonly options:Option[]) {}
 
     addVote(vote:Vote):boolean {
-        const matrix = Util.preferenceListToMatrix(vote.preferenceList, this.options);
-        if(matrix) {
-            this.votes.push(matrix);
+        const converter = new PreferenceListToMatrix(vote.preferenceList, this.options);
+        if(converter.isValid()) {
+            this.votes.push(converter.getMatrix());
         }
-        return !!matrix;
+        return converter.isValid();
     }
 
     getResult() {
@@ -27,6 +28,7 @@ export class Election {
         // todo question is it possible to A < B and B = C, C = A ???
         const compare = (a, b) => strongestPathes.cells[b][a] - strongestPathes.cells[a][b];
 
+        // make it more readable
         const order = Util.simplifyArray(
             Util.groupSame(
                 Util.sort(

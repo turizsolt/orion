@@ -3,34 +3,6 @@ import { Preference } from "./Vote";
 
 export class Util {
 
-    // todo classify
-    static preferenceListToMatrix(preferenceList: Preference[], options: Option[]) {
-        let used = Util.createEmptyVector(options.length, false);
-        let matrix = Util.createEmptyMatrix(options.length);
-        let valid = true;
-
-        for(let preferenceElement of preferenceList) {
-            Util.doWith(preferenceElement, (preference) => {
-                if(used[preference]) valid = false;
-                else used[preference] = 1;
-            });
-            
-            Util.doWith(preferenceElement, (preference) => {
-                for(let i in options) {
-                    if(matrix[preference] === undefined) valid = false;
-                    else matrix[preference][i] = !used[i] ? 1 : 0;
-                }
-
-            });
-        }
-
-        for(let i in options) {
-            if(!used[i]) valid = false;
-        }
-
-        return valid ? matrix : false;
-    }
-
     static createEmptyVector(n: number, empty:any=0) {
         const vector = [];
         for(let i=0;i<n;i++) {
