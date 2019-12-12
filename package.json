@@ -7,12 +7,16 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "test": "tsc && mocha build/test"
+    "test": "tsc && mocha build/test/**"
   },
   "devDependencies": {
     "@types/chai": "^4.2.6",
+    "@types/express": "^4.17.2",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "mocha": "^6.2.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
   }
 }
