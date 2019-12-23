@@ -143,7 +143,7 @@ const sagaMiddleware = createSagaMiddleware();
 const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
 
 async function apiFetchUser() {
-    const result = await fetch('http://localhost:8080/election/1/');
+    const result = await fetch('http://api.condorcet.zsiri.eu/election/1/');
     const data = await result.json();
     console.log(data);
 
@@ -151,7 +151,7 @@ async function apiFetchUser() {
 };
 
 async function apiSubmit(arr: any) {
-    await fetch('http://localhost:8080/election/1/vote', {
+    await fetch('http://api.condorcet.zsiri.eu/election/1/vote', {
         method: 'post',
         headers: {
             'Content-Type': 'application/json',
@@ -259,6 +259,9 @@ const Almafa: React.FC = () => {
         {false && <button onClick={handleFetch}>Fetch</button>}
         {(selection.length > 0 || list.length > 0) &&
         <>
+        <div>
+            A felsorolt hozzávalók közül válaszd ki és rangsorold azokat, amelyeket szívesen látnál a pizzádon a következő pizza partin. A bal oldali nyilakra kattintva tudod őket kiválasztani, majd ezután a fel-le nyilakkal tudsz módosítani a sorrenden. Amikor elkészültél, add meg a neved, és küldd be a sorrendedet a submit vote gombra kattintva.
+        </div>
         <input type="text" value={name} onChange={handleNameChange} />
         <button onClick={handleSubmit}>Submit vote</button>
         </>}

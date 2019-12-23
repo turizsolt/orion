@@ -5,7 +5,7 @@ import * as bodyParser from "body-parser";
 import { Vote } from "../logic/Vote";
 import * as fs from "fs";
 const app = express();
-const port = 8080;
+const port = 8901;
 
 const pizzas = [
     'szalámi',
@@ -38,7 +38,7 @@ const pizzas = [
     'ananász',
     'trappista',
     'mozzarella',
-    'káksajt',
+    'kéksajt',
     'camembert',
 ];
 
