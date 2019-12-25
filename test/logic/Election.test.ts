@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { Election } from '../src/Election';
-import { Option } from '../src/Option';
-import { Vote } from '../src/Vote';
+import { Election } from '../../src/logic/Election';
+import { Option } from '../../src/logic/Option';
+import { Vote } from '../../src/logic/Vote';
 
 describe('Election', () => {
     let options:Option[];
