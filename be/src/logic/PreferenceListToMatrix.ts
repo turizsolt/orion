@@ -1,13 +1,16 @@
-import { Preference } from "./Vote";
-import { Option } from "./Option";
-import { Util } from "./Util";
+import { Option } from './Option';
+import { Util } from './Util';
+import { Preference } from './Vote';
 
 export class PreferenceListToMatrix {
-    private used:boolean[];
-    private matrix:number[][];
-    private valid:boolean;
+    private used: boolean[];
+    private matrix: number[][];
+    private valid: boolean;
 
-    constructor(private preferenceList: Preference[], private options: Option[]) {
+    constructor(
+        private preferenceList: Preference[],
+        private options: Option[],
+    ) {
         this.used = Util.createEmptyVector(options.length, false);
         this.matrix = Util.createEmptyMatrix(options.length);
         this.valid = true;
@@ -16,23 +19,24 @@ export class PreferenceListToMatrix {
         this.checkIfAllOptionsUsed();
     }
 
-    isValid():boolean {
+    public isValid(): boolean {
         return this.valid;
     }
 
-    getMatrix():number[][] {
+    public getMatrix(): number[][] {
         return this.matrix;
     }
 
     private checkIfAllOptionsUsed() {
-        for (let i in this.options) {
-            if (!this.used[i])
+        for (const i in this.options) {
+            if (!this.used[i]) {
                 this.valid = false;
+            }
         }
     }
 
     private convertAllPreferenceLevels() {
-        for (let preferenceLevel of this.preferenceList) {
+        for (const preferenceLevel of this.preferenceList) {
             this.setPreferenceLevelAsUsed(preferenceLevel);
             this.convertOnePreferenceLevel(preferenceLevel);
         }
@@ -42,17 +46,19 @@ export class PreferenceListToMatrix {
         Util.doWith(preferenceLevel, this.convertPreference.bind(this));
     }
 
-    private convertPreference (preference: number): void {
-        for (let i in this.options) {
+    private convertPreference(preference: number): void {
+        const size = this.options.length;
+        for (let i = 0; i < size; i++) {
             this.setIfPreferredAgainstOther(preference, i);
         }
     }
 
-    private setIfPreferredAgainstOther(preference: number, i: string) {
-        if (this.matrix[preference] === undefined)
+    private setIfPreferredAgainstOther(preference: number, i: number) {
+        if (this.matrix[preference] === undefined) {
             this.valid = false;
-        else
+        } else {
             this.matrix[preference][i] = !this.used[i] ? 1 : 0;
+        }
     }
 
     private setPreferenceLevelAsUsed(preferenceElement: Preference) {
@@ -60,9 +66,10 @@ export class PreferenceListToMatrix {
     }
 
     private setPreferenceAsUsed(preference: number): void {
-        if (this.used[preference])
+        if (this.used[preference]) {
             this.valid = false;
-        else
+        } else {
             this.used[preference] = true;
+        }
     }
 }
