@@ -11,6 +11,7 @@
     "rules": {
       "prettier": true,
       "interface-name": false,
-      "react-hooks-nesting": "error"
+      "react-hooks-nesting": "error",
+      "object-literal-sort-keys": false
     }
   }

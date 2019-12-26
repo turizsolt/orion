@@ -1,26 +1,29 @@
-import { PreferenceState } from "./state/PreferenceState";
-import { AnyAction } from "redux";
+import { AnyAction } from 'redux';
+import { PreferenceState } from './state/PreferenceState';
 
-const initialState : PreferenceState = {
+const initialState: PreferenceState = {
     list: [],
     selection: [],
-    name: '', 
+    name: '',
     messageType: 'none',
     message: '',
     displayOptions: false,
 };
 
-export const preferenceReducer = (state: PreferenceState=initialState, action: AnyAction): PreferenceState => {
-    switch(action.type) {
-        case "FETCH_REQUESTED":
-            return { 
+export const preferenceReducer = (
+    state: PreferenceState = initialState,
+    action: AnyAction,
+): PreferenceState => {
+    switch (action.type) {
+        case 'FETCH_REQUESTED':
+            return {
                 ...state,
                 messageType: 'waiting',
                 message: 'Please wait, ballot is loading...',
             };
 
-        case "FETCH_SUCCEEDED":
-            return { 
+        case 'FETCH_SUCCEEDED':
+            return {
                 ...state,
                 list: action.payload.list,
                 messageType: 'none',
@@ -28,7 +31,7 @@ export const preferenceReducer = (state: PreferenceState=initialState, action: A
                 displayOptions: true,
             };
 
-        case "FETCH_FAILED":
+        case 'FETCH_FAILED':
             return {
                 ...state,
                 list: [],
@@ -37,15 +40,15 @@ export const preferenceReducer = (state: PreferenceState=initialState, action: A
                 displayOptions: false,
             };
 
-        case "SUBMIT_REQUESTED":
-            return { 
+        case 'SUBMIT_REQUESTED':
+            return {
                 ...state,
                 messageType: 'waiting',
                 message: 'Uploading your vote to the server...',
                 displayOptions: false,
             };
 
-        case "SUBMIT_SUCCEEDED":
+        case 'SUBMIT_SUCCEEDED':
             return {
                 ...state,
                 messageType: 'success',
@@ -53,97 +56,96 @@ export const preferenceReducer = (state: PreferenceState=initialState, action: A
                 displayOptions: false,
             };
 
-        case "SUBMIT_FAILED":
-            return { 
-                ...state, 
+        case 'SUBMIT_FAILED':
+            return {
+                ...state,
                 messageType: 'error',
                 message: 'Failed to submit, wait and try again.',
                 displayOptions: true,
             };
 
-        case "SELECT":
+        case 'SELECT':
             const { index } = action.payload;
-            const elem = state.list.find((elem) => elem.id === index);
-            console.log(index, elem);
+            const elem = state.list.find(e => e.id === index);
             return {
                 ...state,
-                list: state.list.filter((elem) => elem.id !== index),
-                selection: [...state.selection, ...(elem !== undefined ? [elem] : [])],
+                list: state.list.filter(e => e.id !== index),
+                selection: [
+                    ...state.selection,
+                    ...(elem !== undefined ? [elem] : []),
+                ],
             };
 
-        case "UNSELECT":
+        case 'UNSELECT':
             const { index: index2 } = action.payload;
-            const elem2 = state.selection.find((elem) => elem.id === index2);
-            console.log(index2, elem2);
+            const elem2 = state.selection.find(e => e.id === index2);
             return {
                 ...state,
-                selection: state.selection.filter((elem) => elem.id !== index2),
+                selection: state.selection.filter(e => e.id !== index2),
                 list: [...state.list, ...(elem2 !== undefined ? [elem2] : [])],
             };
 
-        case "TOP":
+        case 'TOP':
             const { index: index3 } = action.payload;
-            const elem3 = state.selection.find((elem) => elem.id === index3);
-            console.log(index3, elem3);
+            const elem3 = state.selection.find(e => e.id === index3);
             return {
                 ...state,
                 selection: [
                     ...(elem3 !== undefined ? [elem3] : []),
-                    ...state.selection.filter((elem) => elem.id !== index3),
+                    ...state.selection.filter(e => e.id !== index3),
                 ],
             };
 
-        case "BOTTOM":
+        case 'BOTTOM':
             const { index: index4 } = action.payload;
-            const elem4 = state.selection.find((elem) => elem.id === index4);
-            console.log(index4, elem4);
+            const elem4 = state.selection.find(e => e.id === index4);
             return {
                 ...state,
                 selection: [
-                    ...state.selection.filter((elem) => elem.id !== index4),
+                    ...state.selection.filter(e => e.id !== index4),
                     ...(elem4 !== undefined ? [elem4] : []),
                 ],
             };
 
-        case "UP":
+        case 'UP':
             const { index: index5 } = action.payload;
-            const position = state.selection.findIndex((elem) => elem.id === index5);
+            const position = state.selection.findIndex(e => e.id === index5);
 
-            if(position < 1) {
+            if (position < 1) {
                 return state;
             } else {
                 return {
                     ...state,
                     selection: [
-                        ...state.selection.slice(0, position-1),
+                        ...state.selection.slice(0, position - 1),
                         state.selection[position],
-                        state.selection[position-1],
-                        ...state.selection.slice(position+1),
+                        state.selection[position - 1],
+                        ...state.selection.slice(position + 1),
                     ],
-                };    
-            };
+                };
+            }
 
-        case "DOWN":
+        case 'DOWN':
             const { index: index6 } = action.payload;
-            const position2 = state.selection.findIndex((elem) => elem.id === index6);
+            const position2 = state.selection.findIndex(e => e.id === index6);
 
-            if(position2 > state.selection.length-2) {
+            if (position2 > state.selection.length - 2) {
                 return state;
             } else {
                 return {
                     ...state,
                     selection: [
                         ...state.selection.slice(0, position2),
-                        state.selection[position2+1],
+                        state.selection[position2 + 1],
                         state.selection[position2],
-                        ...state.selection.slice(position2+2),
+                        ...state.selection.slice(position2 + 2),
                     ],
-                };    
-            };
+                };
+            }
 
-        case "SET_NAME":
+        case 'SET_NAME':
             const { name } = action.payload;
-            
+
             return {
                 ...state,
                 name,
