@@ -7,6 +7,8 @@ script:
 - yarn
 - echo 'Building'
 - yarn build
+scripts:
+- yarn global add codecov
 addons:
   ssh_known_hosts: zsiri.eu
 before_deploy:
@@ -21,3 +23,5 @@ deploy:
   script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/build/* git@zsiri.eu:/var/www/condorcet-server
   on:
     branch: chore/travis
+after_success:
+- codecov
