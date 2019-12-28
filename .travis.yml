@@ -6,7 +6,7 @@ script:
 - echo 'Installing Deps!'
 - yarn
 - echo 'Building'
-- webpack
+- yarn build
 addons:
   ssh_known_hosts: zsiri.eu
 before_deploy:
