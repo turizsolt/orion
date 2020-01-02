@@ -20,6 +20,6 @@ deploy:
   skip_cleanup: true
   script: rsync -r --delete-after --quiet $TRAVIS_BUILD_DIR/build/* git@zsiri.eu:/var/www/condorcet-server
   on:
-    branch: chore/travis
+    branch: master
 after_success:
 - codecov -f coverage/*.json

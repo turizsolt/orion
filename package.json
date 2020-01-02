@@ -14,7 +14,7 @@
     "lint": "tslint -c tslint.json src/**/*.{ts,tsx} --fix --format verbose",
     "clear": "rm -r build/* || true",
     "test": "nyc mocha -r ts-node/register test/**/*.{ts,tsx}",
-    "posttest": "nyc report --reporter=json"
+    "posttest": "nyc report --reporter=json && nyc report --reporter=html"
   },
   "devDependencies": {
     "@types/chai": "^4.2.6",
