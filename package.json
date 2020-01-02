@@ -6,7 +6,7 @@
   "author": "turizsolt <turi.zsolt.m@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "prebuild": "yarn clear && yarn lint",
+    "prebuild": "yarn clear && yarn lint && yarn test",
     "build": "webpack",
     "start": "webpack && node build/index.js",
     "start:dev": "NODE_ENV=development webpack",
