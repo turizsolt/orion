@@ -28,9 +28,19 @@ export class Election {
 
         const strongestPathes = pairwisePreferences.floydWarshall();
 
-        // todo question is it possible to A < B and B = C, C = A ???
-        const compare = (a, b) =>
-            strongestPathes.cells[b][a] - strongestPathes.cells[a][b];
+        const total = [];
+        for (let i = 0; i < strongestPathes.n; i++) {
+            let c = 0;
+            for (let j = 0; j < strongestPathes.n; j++) {
+                c =
+                    strongestPathes.cells[i][j] > strongestPathes.cells[j][i]
+                        ? c + 1
+                        : c;
+            }
+            total.push(c);
+        }
+
+        const compare = (a, b) => total[b] - total[a];
 
         const order = Util.simplifyArray(
             Util.groupSame(compare)(
@@ -44,6 +54,13 @@ export class Election {
             pairwisePreferences,
             strongestPathes,
             order,
+            total: order.map(x => {
+                if (typeof x === 'object') {
+                    return x.map(y => total[y]);
+                } else {
+                    return total[x];
+                }
+            }),
         };
     }
 }
