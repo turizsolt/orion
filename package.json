@@ -13,7 +13,6 @@
     "run:dev": "NODE_ENV=development nodemon build/index.js",
     "lint": "tslint -c tslint.json src/**/*.{ts,tsx} --fix --format verbose",
     "clear": "rm -r build/* || true",
-
     "test": "nyc mocha -r ts-node/register test/**/*.{ts,tsx}",
     "posttest": "nyc report --reporter=json"
   },
@@ -22,6 +21,7 @@
     "@types/express": "^4.17.2",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
+    "codecov": "^3.6.1",
     "mocha": "^6.2.2",
     "nodemon": "^2.0.2",
     "nyc": "^15.0.0",

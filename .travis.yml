@@ -7,8 +7,6 @@ script:
 - yarn
 - echo 'Building'
 - yarn build
-scripts:
-- yarn global add codecov
 addons:
   ssh_known_hosts: zsiri.eu
 before_deploy:
