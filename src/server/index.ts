@@ -85,7 +85,7 @@ app.get('/election/:id/result', (req, res) => {
 });
 
 app.get('/test', (req, res) => {
-    res.send('reply');
+    res.send('reply almafa');
 });
 
 app.listen(port, () => {

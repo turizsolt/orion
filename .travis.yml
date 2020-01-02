@@ -22,6 +22,6 @@ deploy:
   on:
     branch: master
 after_deploy:
-- ssh -i ./deploy_rsa git@zsiri.eu "forever start /var/www/condorcet-server/index.js"
+- ssh -i ./deploy_rsa git@zsiri.eu "forever restart /var/www/condorcet-server/index.js"
 after_success:
 - codecov -f coverage/*.json
