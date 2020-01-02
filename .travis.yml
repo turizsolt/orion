@@ -24,4 +24,4 @@ deploy:
   on:
     branch: chore/travis
 after_success:
-- codecov
+- codecov -f coverage/*.json
