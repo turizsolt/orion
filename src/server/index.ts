@@ -1,94 +1,79 @@
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import * as fs from 'fs';
-import { Election } from '../logic/Election';
-import { Option } from '../logic/Option';
-import { Vote } from '../logic/Vote';
-const app = express();
-const port = 8901;
+import * as fastify from 'fastify';
+import { AddressInfo } from 'net';
+import { ActualBusiness } from '../logic/ActualBusiness';
 
-const pizzas = [
-    'szalámi',
-    'sonka',
-    'kolbász',
-    'császárszalonna',
-    'tonhal',
-    'csirkehús',
-    'tojás',
-    'paprika',
-    'csipős paprika',
-    'paradicsom',
-    'vöröshagyma',
-    'lilahagyma',
-    'fokhagyma',
-    'póréhagyma',
-    'bab',
-    'borsó',
-    'fekete olajbogyó',
-    'zöld olajbogyó',
-    'articsóka',
-    'kukorica',
-    'gomba',
-    'rukkola',
-    'brokkoli',
-    'spenót',
-    'oregánó',
-    'bazsalikom',
-    'banán',
-    'ananász',
-    'trappista',
-    'mozzarella',
-    'kéksajt',
-    'camembert',
-];
+// todo inversify
+const business = new ActualBusiness();
 
-const options = [];
-for (const pizza of pizzas) {
-    options.push(new Option(pizza));
-}
-const name = 'pizza';
-const election = new Election(name, options);
+const app = fastify({ logger: true });
 
-app.use(bodyParser.json());
-
-app.get('/', (req, res) => {
-    res.send('Hello world!');
+app.get('/', async () => {
+    return { hello: 'world' };
 });
 
-app.get('/election/:id', (req, res) => {
-    res.send({
-        name: election.name,
-        options: election.options.map(option => option.name),
-    });
+const postSchema = {
+    body: {
+        type: 'object',
+        required: ['preferenceList', 'name'],
+        properties: {
+            preferenceList: {
+                type: 'array',
+                items: {
+                    oneOf: [
+                        { type: 'array', items: { type: 'integer' } },
+                        { type: 'integer' },
+                    ],
+                },
+            },
+            name: { type: 'string' },
+        },
+    },
+    params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+            id: { type: 'string' },
+        },
+    },
+};
+
+const idSchema = {
+    params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+            id: { type: 'string' },
+        },
+    },
+};
+
+app.get('/election/:id', { schema: idSchema }, async request => {
+    const { id } = request.params;
+    const election = business.getElection(id);
+    return election;
 });
 
-app.post('/election/:id/vote', (req, res) => {
-    const vote = new Vote(req.body.preferenceList, req.body.name);
-    election.addVote(vote);
-    if (!fs.existsSync('votes')) {
-        fs.mkdirSync('votes');
+app.get('/election/:id/result', { schema: idSchema }, async request => {
+    const { id } = request.params;
+    const electionResult = business.getElectionResult(id);
+    return electionResult;
+});
+
+app.post('/election/:id/vote', { schema: postSchema }, async request => {
+    const { preferenceList, name } = request.body;
+    const id = request.params.id;
+    business.addVoteToElection(id, { preferenceList, name });
+    return true;
+});
+
+const start = async () => {
+    try {
+        await app.listen(8901);
+        const address = app.server.address() as AddressInfo;
+        app.log.info(`server listening on ${address.port}`);
+    } catch (err) {
+        app.log.error(err);
+        process.exit(1);
     }
-    fs.writeFileSync(
-        'votes/' +
-            new Date().toISOString() +
-            '.' +
-            (Math.floor(Math.random() * 9000) + 1000) +
-            '.txt',
-        JSON.stringify(vote),
-        'utf-8',
-    );
-    res.sendStatus(200);
-});
-
-app.get('/election/:id/result', (req, res) => {
-    res.send(election.getResult());
-});
-
-app.get('/test', (req, res) => {
-    res.send('reply almafa');
-});
-
-app.listen(port, () => {
-    // tslint:disable-next-line: no-console
-    console.log(`Server started at http://localhost:${port}`);
-});
+};
+start();

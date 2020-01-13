@@ -4,3 +4,4 @@ votes/*
 coverage/*
 !coverage/.nothing
 .nyc_output/*
+db.json

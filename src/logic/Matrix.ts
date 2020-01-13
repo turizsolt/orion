@@ -10,7 +10,7 @@ export class Matrix {
         }
     }
 
-    public add(m: Matrix) {
+    public add(m: number[][]) {
         for (let i = 0; i < this.n; i++) {
             for (let j = 0; j < this.m; j++) {
                 this.cells[i][j] += m[i][j];
