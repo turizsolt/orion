@@ -18,6 +18,7 @@ export interface VoteDTO {
     name: string;
     electionId: string;
     id: string;
+    createdAt: Date;
 }
 
 export type PreferenceList = PreferenceListItem[];

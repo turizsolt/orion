@@ -54,6 +54,7 @@ export class ActualBusiness implements Business {
                 ...vote,
                 electionId: id,
                 id: shortid.generate(),
+                createdAt: new Date(),
             });
         }
         return converter.isValid();
