@@ -2,11 +2,13 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const httpErrors = require('http-errors');
-
 const adapter = new FileSync('db.json');
 const db = low(adapter);
+import { injectable } from 'inversify';
+
 db.defaults({ vote: [], election: [] }).write();
 
+@injectable()
 export class ActualPersistence {
     public save<Record>(collectionName: string, record: Record): void {
         db.get(collectionName)

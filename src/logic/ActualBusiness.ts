@@ -1,6 +1,8 @@
+import { injectable } from 'inversify';
 import shortid = require('shortid');
-import { ActualPersistence } from '../persistence/ActualPersistence';
+import { runContainer } from '../inversify.config';
 import { Persistence } from '../persistence/Persistence';
+import { TYPES } from '../types';
 import {
     Business,
     Election,
@@ -12,8 +14,9 @@ import { Matrix } from './Matrix';
 import { PreferenceListToMatrix } from './PreferenceListToMatrix';
 import { Util } from './Util';
 
-const persistence: Persistence = new ActualPersistence();
+const persistence = runContainer.get<Persistence>(TYPES.Persistence);
 
+@injectable()
 export class ActualBusiness implements Business {
     public getElectionVoteCount(id: string): number {
         const votes = persistence.getFiltered<VoteDTO>('vote', {

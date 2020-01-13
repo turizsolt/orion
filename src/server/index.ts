@@ -1,9 +1,10 @@
 import * as fastify from 'fastify';
 import { AddressInfo } from 'net';
-import { ActualBusiness } from '../logic/ActualBusiness';
+import { runContainer } from '../inversify.config';
+import { Business } from '../logic/Business';
+import { TYPES } from '../types';
 
-// todo inversify
-const business = new ActualBusiness();
+const business = runContainer.get<Business>(TYPES.Business);
 
 const app = fastify({ logger: true });
 
