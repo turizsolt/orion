@@ -1,25 +1,34 @@
 import shortid = require('shortid');
+import { ActualPersistence } from '../persistence/ActualPersistence';
 import { Persistence } from '../persistence/Persistence';
-import { Business, VoteInput } from './Business';
+import {
+    Business,
+    Election,
+    ElectionResult,
+    VoteDTO,
+    VoteInput,
+} from './Business';
 import { Matrix } from './Matrix';
 import { PreferenceListToMatrix } from './PreferenceListToMatrix';
 import { Util } from './Util';
 
+const persistence: Persistence = new ActualPersistence();
+
 export class ActualBusiness implements Business {
-    public getElection(id: string) {
-        const election = Persistence.getOne('election', id);
+    public getElection(id: string): Election {
+        const election = persistence.getOne<Election>('election', id);
         return election;
     }
 
-    public addVoteToElection(id: string, vote: VoteInput) {
-        const election = Persistence.getOne('election', id);
+    public addVoteToElection(id: string, vote: VoteInput): boolean {
+        const election = persistence.getOne<Election>('election', id);
         const converter = new PreferenceListToMatrix(
             vote.preferenceList,
             election.options,
         );
 
         if (converter.isValid()) {
-            Persistence.save('vote', {
+            persistence.save<VoteDTO>('vote', {
                 ...vote,
                 electionId: id,
                 id: shortid.generate(),
@@ -28,11 +37,13 @@ export class ActualBusiness implements Business {
         return converter.isValid();
     }
 
-    public getElectionResult(id: string) {
-        const election = Persistence.getOne('election', id);
+    public getElectionResult(id: string): ElectionResult {
+        const election = persistence.getOne<Election>('election', id);
         const pairwisePreferences = new Matrix(election.options.length);
 
-        const votes = Persistence.getFiltered('vote', { electionId: id });
+        const votes = persistence.getFiltered<VoteDTO>('vote', {
+            electionId: id,
+        });
 
         for (const vote of votes) {
             const converter = new PreferenceListToMatrix(
