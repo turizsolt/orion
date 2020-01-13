@@ -1,6 +1,3 @@
-import { Option } from './Option';
-import { Preference } from './Vote';
-
 export class Util {
     public static createEmptyVector(n: number, empty: any = 0) {
         const vector = [];

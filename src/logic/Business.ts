@@ -4,6 +4,8 @@ export interface Business {
     getElection(id: string): Election;
     getElectionResult(id: string): ElectionResult;
     addVoteToElection(id: string, vote: VoteInput): boolean;
+    createElection(name: string, options: string[]): Election;
+    getElectionVoteCount(id: string): number;
 }
 
 export interface VoteInput {
@@ -24,6 +26,7 @@ export type PreferenceListItem = number | number[];
 export interface Election {
     name: string;
     options: Option[];
+    id: string;
 }
 
 export interface Option {

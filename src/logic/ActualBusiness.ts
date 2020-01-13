@@ -15,8 +15,28 @@ import { Util } from './Util';
 const persistence: Persistence = new ActualPersistence();
 
 export class ActualBusiness implements Business {
+    public getElectionVoteCount(id: string): number {
+        const votes = persistence.getFiltered<VoteDTO>('vote', {
+            electionId: id,
+        });
+
+        return votes.length;
+    }
+
     public getElection(id: string): Election {
         const election = persistence.getOne<Election>('election', id);
+        return election;
+    }
+
+    public createElection(name: string, options: string[]): Election {
+        const election = {
+            name,
+            options: options.map(op => ({ name: op })),
+            id: shortid.generate(),
+        };
+
+        persistence.save<Election>('election', election);
+
         return election;
     }
 
