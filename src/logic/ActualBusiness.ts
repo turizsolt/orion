@@ -1,6 +1,5 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import shortid = require('shortid');
-import { runContainer } from '../inversify.config';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
 import {
@@ -14,12 +13,12 @@ import { Matrix } from './Matrix';
 import { PreferenceListToMatrix } from './PreferenceListToMatrix';
 import { Util } from './Util';
 
-const persistence = runContainer.get<Persistence>(TYPES.Persistence);
-
 @injectable()
 export class ActualBusiness implements Business {
+    @inject(TYPES.Persistence) private persistence: Persistence;
+
     public getElectionVoteCount(id: string): number {
-        const votes = persistence.getFiltered<VoteDTO>('vote', {
+        const votes = this.persistence.getFiltered<VoteDTO>('vote', {
             electionId: id,
         });
 
@@ -27,7 +26,7 @@ export class ActualBusiness implements Business {
     }
 
     public getElection(id: string): Election {
-        const election = persistence.getOne<Election>('election', id);
+        const election = this.persistence.getOne<Election>('election', id);
         return election;
     }
 
@@ -38,20 +37,20 @@ export class ActualBusiness implements Business {
             id: shortid.generate(),
         };
 
-        persistence.save<Election>('election', election);
+        this.persistence.save<Election>('election', election);
 
         return election;
     }
 
     public addVoteToElection(id: string, vote: VoteInput): boolean {
-        const election = persistence.getOne<Election>('election', id);
+        const election = this.persistence.getOne<Election>('election', id);
         const converter = new PreferenceListToMatrix(
             vote.preferenceList,
             election.options,
         );
 
         if (converter.isValid()) {
-            persistence.save<VoteDTO>('vote', {
+            this.persistence.save<VoteDTO>('vote', {
                 ...vote,
                 electionId: id,
                 id: shortid.generate(),
@@ -61,10 +60,10 @@ export class ActualBusiness implements Business {
     }
 
     public getElectionResult(id: string): ElectionResult {
-        const election = persistence.getOne<Election>('election', id);
+        const election = this.persistence.getOne<Election>('election', id);
         const pairwisePreferences = new Matrix(election.options.length);
 
-        const votes = persistence.getFiltered<VoteDTO>('vote', {
+        const votes = this.persistence.getFiltered<VoteDTO>('vote', {
             electionId: id,
         });
 

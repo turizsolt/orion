@@ -1,8 +1,10 @@
 import { expect } from 'chai';
-import { ActualBusiness } from '../../src/logic/ActualBusiness';
+import { Business } from '../../src/logic/Business';
 import { PreferenceListToMatrix } from '../../src/logic/PreferenceListToMatrix';
+import { TYPES } from '../../src/types';
+import { isolatedContainer } from '../inversify.config';
 
-const business = new ActualBusiness();
+const business = isolatedContainer.get<Business>(TYPES.Business);
 
 describe('Election', () => {
     const optionList = ['cheese', 'tomato', 'oregano'];

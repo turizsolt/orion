@@ -9,7 +9,7 @@ import { injectable } from 'inversify';
 db.defaults({ vote: [], election: [] }).write();
 
 @injectable()
-export class ActualPersistence {
+export class JsonFilePersistence {
     public save<Record>(collectionName: string, record: Record): void {
         db.get(collectionName)
             .push(record)

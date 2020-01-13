@@ -1,8 +1,9 @@
 import { expect } from 'chai';
-import { ActualBusiness } from '../../src/logic/ActualBusiness';
-import { Election } from '../../src/logic/Business';
+import { Business, Election } from '../../src/logic/Business';
+import { TYPES } from '../../src/types';
+import { isolatedContainer } from '../inversify.config';
 
-const business = new ActualBusiness();
+const business = isolatedContainer.get<Business>(TYPES.Business);
 
 describe('results', () => {
     let election: Election;

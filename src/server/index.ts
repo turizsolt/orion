@@ -51,7 +51,10 @@ const idSchema = {
 app.get('/election/:id', { schema: idSchema }, async request => {
     const { id } = request.params;
     const election = business.getElection(id);
-    return election;
+    return {
+        ...election,
+        options: election.options.map(x => x.name),
+    };
 });
 
 app.get('/election/:id/result', { schema: idSchema }, async request => {
