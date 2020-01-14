@@ -12,7 +12,8 @@ export class InMemoryPersistence implements Persistence {
         id: string,
         record: Record,
     ): void {
-        throw new Error('Method not implemented.');
+        const position = db[collectionName].findIndex(x => x.id === id);
+        db[collectionName][position] = record;
     }
 
     public save<Record>(collectionName: string, record: Record): void {

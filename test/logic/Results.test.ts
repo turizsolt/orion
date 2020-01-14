@@ -5,7 +5,7 @@ import { isolatedContainer } from '../inversify.config';
 
 const business = isolatedContainer.get<Business>(TYPES.Business);
 
-describe('results', () => {
+describe('Results', () => {
     let election: Election;
     const optionList = ['A', 'B', 'C', 'D', 'E'];
     const name = 'testElection';
