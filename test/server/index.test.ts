@@ -17,7 +17,7 @@ describe('Server API', () => {
 
     before(async () => {
         server = isolatedContainer.get<Server>(TYPES.Server);
-        server.start(8901);
+        server.start(config.testServerPort);
     });
 
     step('get hello', async () => {
