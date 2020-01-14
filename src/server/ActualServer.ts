@@ -13,7 +13,7 @@ export class ActualServer implements Server {
     @inject(TYPES.Business) private business: Business;
 
     constructor() {
-        this.app = fastify({ logger: false });
+        this.app = fastify({ logger: true });
 
         this.app.get('/', async () => {
             return { hello: 'world' };
