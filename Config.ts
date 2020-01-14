@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 export let config = {
     adminKey: '',
-    testServerAddress: 'http://localhost',
+    testServerAddress: 'http://0.0.0.0',
     testServerPort: 3000,
     port: 3000,
 };
