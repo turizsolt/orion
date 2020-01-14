@@ -2,13 +2,12 @@ import axios, { AxiosError } from 'axios';
 import { expect } from 'chai';
 import * as fs from 'fs';
 import { step } from 'mocha-steps';
+import { config } from '../../Config';
 
 import { Server } from '../../src/server/Server';
 import { TYPES } from '../../src/types';
 import { isolatedContainer } from '../inversify.config';
 
-const configText = fs.readFileSync(process.cwd() + '/config.json', 'utf8');
-const config = JSON.parse(configText);
 const uriPerfix = `${config.testServerAddress}:${config.testServerPort}`;
 const adminKey = config.adminKey;
 

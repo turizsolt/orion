@@ -2,6 +2,7 @@ import * as fastify from 'fastify';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { AddressInfo } from 'net';
+import { config } from '../../Config';
 import { Business } from '../logic/Business';
 import { TYPES } from '../types';
 import { Server } from './Server';
@@ -17,16 +18,6 @@ export class ActualServer implements Server {
         this.app.get('/', async () => {
             return { hello: 'world' };
         });
-
-        interface Config {
-            adminKey: string;
-        }
-
-        const configText = fs.readFileSync(
-            process.cwd() + '/config.json',
-            'utf8',
-        );
-        const config: Config = JSON.parse(configText);
 
         const adminBarrier = (request: fastify.FastifyRequest) => {
             const { key } = request.query;
