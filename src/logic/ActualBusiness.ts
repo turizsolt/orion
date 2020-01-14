@@ -17,6 +17,12 @@ import { Util } from './Util';
 export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
 
+    public closeElection(id: string): void {
+        const election = this.persistence.getOne<Election>('election', id);
+        election.open = false;
+        this.persistence.update<Election>('election', id, election);
+    }
+
     public getElectionVoteCount(id: string): number {
         const votes = this.persistence.getFiltered<VoteDTO>('vote', {
             electionId: id,
@@ -31,10 +37,12 @@ export class ActualBusiness implements Business {
     }
 
     public createElection(name: string, options: string[]): Election {
-        const election = {
+        const election: Election = {
             name,
             options: options.map(op => ({ name: op })),
             id: shortid.generate(),
+            createdAt: new Date(),
+            open: true,
         };
 
         this.persistence.save<Election>('election', election);
@@ -44,6 +52,10 @@ export class ActualBusiness implements Business {
 
     public addVoteToElection(id: string, vote: VoteInput): boolean {
         const election = this.persistence.getOne<Election>('election', id);
+        if (!election.open) {
+            throw new Error('The election has been already closed.');
+        }
+
         const converter = new PreferenceListToMatrix(
             vote.preferenceList,
             election.options,

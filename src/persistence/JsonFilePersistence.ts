@@ -5,11 +5,23 @@ const httpErrors = require('http-errors');
 const adapter = new FileSync('db.json');
 const db = low(adapter);
 import { injectable } from 'inversify';
+import { Persistence } from './Persistence';
 
 db.defaults({ vote: [], election: [] }).write();
 
 @injectable()
-export class JsonFilePersistence {
+export class JsonFilePersistence implements Persistence {
+    public update<Record>(
+        collectionName: string,
+        id: string,
+        record: Record,
+    ): void {
+        db.get(collectionName)
+            .find({ id })
+            .assign(record)
+            .write();
+    }
+
     public save<Record>(collectionName: string, record: Record): void {
         db.get(collectionName)
             .push(record)

@@ -1,11 +1,20 @@
 // tslint:disable: no-var-requires
 import { injectable } from 'inversify';
+import { Persistence } from './Persistence';
 const httpErrors = require('http-errors');
 
 const db = { vote: [], election: [] };
 
 @injectable()
-export class InMemoryPersistence {
+export class InMemoryPersistence implements Persistence {
+    public update<Record>(
+        collectionName: string,
+        id: string,
+        record: Record,
+    ): void {
+        throw new Error('Method not implemented.');
+    }
+
     public save<Record>(collectionName: string, record: Record): void {
         db[collectionName].push(record);
     }

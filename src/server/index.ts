@@ -38,6 +38,20 @@ const postSchema = {
     },
 };
 
+const postElectionSchema = {
+    body: {
+        type: 'object',
+        required: ['options', 'name'],
+        properties: {
+            options: {
+                type: 'array',
+                items: { type: 'string' },
+            },
+            name: { type: 'string' },
+        },
+    },
+};
+
 const idSchema = {
     params: {
         type: 'object',
@@ -67,6 +81,18 @@ app.post('/election/:id/vote', { schema: postSchema }, async request => {
     const { preferenceList, name } = request.body;
     const id = request.params.id;
     business.addVoteToElection(id, { preferenceList, name });
+    return true;
+});
+
+app.post('/election/:id/close', { schema: idSchema }, async request => {
+    const id = request.params.id;
+    business.closeElection(id);
+    return true;
+});
+
+app.post('/election', { schema: postElectionSchema }, async request => {
+    const { options, name } = request.body;
+    business.createElection(name, options);
     return true;
 });
 

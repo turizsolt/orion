@@ -6,6 +6,7 @@ export interface Business {
     addVoteToElection(id: string, vote: VoteInput): boolean;
     createElection(name: string, options: string[]): Election;
     getElectionVoteCount(id: string): number;
+    closeElection(id: string): void;
 }
 
 export interface VoteInput {
@@ -28,6 +29,8 @@ export interface Election {
     name: string;
     options: Option[];
     id: string;
+    createdAt: Date;
+    open: boolean;
 }
 
 export interface Option {
