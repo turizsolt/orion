@@ -13,7 +13,7 @@
     "run:dev": "NODE_ENV=development nodemon build/index.js",
     "lint": "tslint -c tslint.json src/**/*.{ts,tsx} --fix --format verbose",
     "clear": "rm -r build/* || true",
-    "test": "nyc mocha -r ts-node/register test/**/*.{ts,tsx}",
+    "test": "nyc mocha -r ts-node/register test/simple.test.ts",
     "posttest": "nyc report --reporter=json && nyc report --reporter=html"
   },
   "devDependencies": {
@@ -48,6 +48,7 @@
     "http-errors": "^1.7.3",
     "inversify": "^5.0.1",
     "lowdb": "^1.0.0",
+    "node-fetch": "^2.6.0",
     "reflect-metadata": "^0.1.13",
     "shortid": "^2.2.15"
   }
