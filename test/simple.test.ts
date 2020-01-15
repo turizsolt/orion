@@ -20,7 +20,7 @@ fastify.get('/', async (request, reply) => {
 
 const start = async () => {
     try {
-        await fastify.listen(9865);
+        await fastify.listen(8080);
         fastify.log.info(
             `server listening on ${fastify.server.address().port}`,
         );
@@ -38,7 +38,7 @@ setTimeout(() => {
 
 describe('Localhost', () => {
     it('connect', async () => {
-        const res = await fetch('http://localhost:9865/');
+        const res = await fetch('http://localhost:8080/');
         const json = await res.json();
         expect(json).deep.equal({ hello: 'world' });
     });
