@@ -1,5 +1,5 @@
 import * as fastify from 'fastify';
-import * as fs from 'fs';
+import * as fastifyCors from 'fastify-cors';
 import { inject, injectable } from 'inversify';
 import { AddressInfo } from 'net';
 import { config } from '../../Config';
@@ -14,6 +14,8 @@ export class ActualServer implements Server {
 
     constructor() {
         this.app = fastify({ logger: true });
+
+        this.app.register(fastifyCors, {});
 
         this.app.get('/', async () => {
             return { hello: 'world' };
