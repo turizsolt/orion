@@ -1,6 +1,5 @@
-import { Option } from './Option';
+import { Option, PreferenceList, PreferenceListItem } from './Business';
 import { Util } from './Util';
-import { Preference } from './Vote';
 
 export class PreferenceListToMatrix {
     private used: boolean[];
@@ -8,7 +7,7 @@ export class PreferenceListToMatrix {
     private valid: boolean;
 
     constructor(
-        private preferenceList: Preference[],
+        private preferenceList: PreferenceList,
         private options: Option[],
     ) {
         this.used = Util.createEmptyVector(options.length, false);
@@ -42,7 +41,7 @@ export class PreferenceListToMatrix {
         }
     }
 
-    private convertOnePreferenceLevel(preferenceLevel: Preference) {
+    private convertOnePreferenceLevel(preferenceLevel: PreferenceListItem) {
         Util.doWith(preferenceLevel, this.convertPreference.bind(this));
     }
 
@@ -61,7 +60,7 @@ export class PreferenceListToMatrix {
         }
     }
 
-    private setPreferenceLevelAsUsed(preferenceElement: Preference) {
+    private setPreferenceLevelAsUsed(preferenceElement: PreferenceListItem) {
         Util.doWith(preferenceElement, this.setPreferenceAsUsed.bind(this));
     }
 

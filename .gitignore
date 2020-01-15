@@ -1,6 +1,7 @@
 node_modules/*
 build/*
-votes/*
 coverage/*
 !coverage/.nothing
 .nyc_output/*
+db.json
+config.json
