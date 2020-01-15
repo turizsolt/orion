@@ -2,7 +2,8 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const httpErrors = require('http-errors');
-const adapter = new FileSync('db.json');
+
+const adapter = new FileSync(__dirname + '/db.json');
 const db = low(adapter);
 import { injectable } from 'inversify';
 import { Persistence } from './Persistence';
