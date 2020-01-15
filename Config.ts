@@ -6,7 +6,7 @@ export let config = {
     testServerPort: 9865,
     port: 9865,
 };
-if (fs.existsSync(process.cwd() + '/config.json')) {
-    const configText = fs.readFileSync(process.cwd() + '/config.json', 'utf8');
+if (fs.existsSync(__dirname + '/config.json')) {
+    const configText = fs.readFileSync(__dirname + '/config.json', 'utf8');
     config = JSON.parse(configText);
 }
