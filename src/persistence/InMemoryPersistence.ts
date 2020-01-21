@@ -3,7 +3,7 @@ import { injectable } from 'inversify';
 import { Persistence } from './Persistence';
 const httpErrors = require('http-errors');
 
-const db = { vote: [], election: [] };
+const db = { item: [] };
 
 @injectable()
 export class InMemoryPersistence implements Persistence {

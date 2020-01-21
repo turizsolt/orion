@@ -13,6 +13,7 @@
     "run:dev": "NODE_ENV=development nodemon build/index.js",
     "lint": "tslint -c tslint.json src/**/*.{ts,tsx} --fix --format verbose",
     "clear": "rm -r build/* || true",
+    "test:only": "mocha -r ts-node/register test/**/*.{ts,tsx}",
     "test": "nyc mocha -r ts-node/register test/**/*.{ts,tsx}",
     "posttest": "nyc report --reporter=json && nyc report --reporter=html"
   },
