@@ -14,8 +14,8 @@ export class ActualBusiness implements Business {
 
     public createItem(item: Item) {
         const itemWithId = {
-            id: shortid.generate(),
             ...item,
+            id: shortid.generate(),
         };
 
         this.persistence.save('item', itemWithId);
