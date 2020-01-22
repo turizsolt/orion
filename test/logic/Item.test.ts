@@ -8,7 +8,9 @@ const business = testContainer.get<Business>(TYPES.Business);
 describe('Basic item operations', () => {
     it('Create an item', () => {
         const item = {
-            title: 'Create an orion server persistance',
+            fields: {
+                title: 'Create an orion server persistance',
+            },
             children: [],
         };
 
@@ -20,7 +22,9 @@ describe('Basic item operations', () => {
 
     it('Create two items, gets different id', () => {
         const item = {
-            title: 'Create an orion server persistance',
+            fields: {
+                title: 'Create an orion server persistance',
+            },
             children: [],
         };
 
@@ -32,7 +36,9 @@ describe('Basic item operations', () => {
 
     it('Create an item, get it back', () => {
         const item = {
-            title: 'Create an orion server persistance',
+            fields: {
+                title: 'Create an orion server persistance',
+            },
             children: [],
         };
 

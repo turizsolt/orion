@@ -21,7 +21,12 @@ io.on('connection', socket => {
 
     socket.on('createItem', (data: Item) => {
         const item = business.createItem(data);
-        socket.emit('createdItem', item);
+        io.emit('createdItem', item);
+    });
+
+    socket.on('updateItem', (data: any) => {
+        const retdata = business.updateItem(data);
+        setTimeout(() => io.emit('updatedItem', retdata), 3000);
     });
 
     socket.on('getItem', ({ id }) => {
