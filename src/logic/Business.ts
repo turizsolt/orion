@@ -2,6 +2,7 @@ export interface Business {
     createItem(item: Item);
     updateItem(data: any);
     getItem(id: ItemId);
+    getAllItem();
 }
 
 export interface Item {

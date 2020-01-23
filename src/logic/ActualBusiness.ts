@@ -21,6 +21,10 @@ export class ActualBusiness implements Business {
         return this.persistence.getOne('item', id);
     }
 
+    public getAllItem() {
+        return this.persistence.getAll('item');
+    }
+
     public createItem(item: Item) {
         const itemWithId = {
             ...item,

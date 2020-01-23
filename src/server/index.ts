@@ -33,6 +33,11 @@ io.on('connection', socket => {
         const item = business.getItem(id);
         socket.emit('gotItem', item);
     });
+
+    socket.on('getAllItem', () => {
+        const items = business.getAllItem();
+        socket.emit('gotAllItem', items);
+    });
 });
 
 server.listen(3000, () => {
