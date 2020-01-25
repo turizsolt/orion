@@ -39,7 +39,7 @@ export class ActualBusiness implements Business {
         return this.persistence.getAll('item');
     }
 
-    public createItem(item: Item) {
+    public createItem(item: any) {
         this.persistence.save('item', item);
         return item;
     }

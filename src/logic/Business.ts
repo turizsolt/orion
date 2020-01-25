@@ -1,5 +1,5 @@
 export interface Business {
-    createItem(item: Item);
+    createItem(item: any);
     createRelation(data: any);
     updateItem(data: any);
     getItem(id: ItemId);
