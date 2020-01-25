@@ -1,8 +1,10 @@
+import { injectable } from 'inversify';
 import { Id, IdGenerator } from './IdGenerator';
 
 let counter = 0;
 const counterOverflow = 0x1000;
 
+@injectable()
 export class ActualIdGenerator implements IdGenerator {
     public generate(): Id {
         const millisec = new Date().getTime();
