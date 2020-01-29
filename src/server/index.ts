@@ -10,7 +10,7 @@ import { TYPES } from '../types';
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
-const io = ioLib(server);
+const io = ioLib(server, { transport: ['websocket'], origins: '*' });
 
 const business = serverContainer.get<Business>(TYPES.Business);
 const idGenerator = serverContainer.get<IdGenerator>(TYPES.IdGenerator);
