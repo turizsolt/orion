@@ -1,14 +1,14 @@
 import { Container } from 'inversify';
 import 'reflect-metadata';
-import { ActualBusiness } from './logic/ActualBusiness';
-import { Business } from './logic/Business';
-import { JsonFilePersistence } from './persistence/JsonFilePersistence';
-import { Persistence } from './persistence/Persistence';
-import { ActualServer } from './server/ActualServer';
-import { Server } from './server/Server';
-import { TYPES } from './types';
+import { ActualBusiness } from '../src/logic/ActualBusiness';
+import { Business } from '../src/logic/Business';
+import { JsonFilePersistence } from '../src/persistence/JsonFilePersistence';
+import { Persistence } from '../src/persistence/Persistence';
+import { TYPES } from '../src/types';
+import { ActualIdGenerator } from './logic/idGenerator/ActualIdGenerator';
+import { IdGenerator } from './logic/idGenerator/IdGenerator';
 
-export const runContainer = new Container();
-runContainer.bind<Business>(TYPES.Business).to(ActualBusiness);
-runContainer.bind<Persistence>(TYPES.Persistence).to(JsonFilePersistence);
-runContainer.bind<Server>(TYPES.Server).to(ActualServer);
+export const serverContainer = new Container();
+serverContainer.bind<Business>(TYPES.Business).to(ActualBusiness);
+serverContainer.bind<Persistence>(TYPES.Persistence).to(JsonFilePersistence);
+serverContainer.bind<IdGenerator>(TYPES.IdGenerator).to(ActualIdGenerator);

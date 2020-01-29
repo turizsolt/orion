@@ -1,129 +1,53 @@
 import { inject, injectable } from 'inversify';
-import shortid = require('shortid');
+import * as shortid from 'shortid';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
-import {
-    Business,
-    Election,
-    ElectionResult,
-    VoteDTO,
-    VoteInput,
-} from './Business';
-import { Matrix } from './Matrix';
-import { PreferenceListToMatrix } from './PreferenceListToMatrix';
-import { Util } from './Util';
+import { Business, Item, ItemId } from './Business';
 
 @injectable()
 export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
 
-    public closeElection(id: string): void {
-        const election = this.persistence.getOne<Election>('election', id);
-        election.open = false;
-        this.persistence.update<Election>('election', id, election);
+    public updateItem(data: any) {
+        const item = this.persistence.getOne<Item>('item', data.itemId);
+        item.fields[data.field] = data.newValue;
+        this.persistence.save('item', item);
+        return data;
     }
 
-    public getElectionVoteCount(id: string): number {
-        const votes = this.persistence.getFiltered<VoteDTO>('vote', {
-            electionId: id,
-        });
-
-        return votes.length;
+    public createRelation(data: any) {
+        const itemParent = this.persistence.getOne<Item>('item', data.parentId);
+        const itemChild = this.persistence.getOne<Item>('item', data.childId);
+        itemParent.fields.children = [
+            ...arrify(itemParent.fields.children),
+            data.childId,
+        ];
+        itemChild.fields.parents = [
+            ...arrify(itemParent.fields.parents),
+            data.parentId,
+        ];
+        this.persistence.save('item', itemParent);
+        this.persistence.save('item', itemChild);
+        return data;
     }
 
-    public getElection(id: string): Election {
-        const election = this.persistence.getOne<Election>('election', id);
-        return election;
+    public getItem(id: ItemId) {
+        return this.persistence.getOne('item', id);
     }
 
-    public createElection(name: string, options: string[]): Election {
-        const election: Election = {
-            name,
-            options: options.map(op => ({ name: op })),
-            id: shortid.generate(),
-            createdAt: new Date(),
-            open: true,
-        };
-
-        this.persistence.save<Election>('election', election);
-
-        return election;
+    public getAllItem() {
+        return this.persistence.getAll('item');
     }
 
-    public addVoteToElection(id: string, vote: VoteInput): boolean {
-        const election = this.persistence.getOne<Election>('election', id);
-        if (!election.open) {
-            throw new Error('The election has been already closed.');
-        }
-
-        const converter = new PreferenceListToMatrix(
-            vote.preferenceList,
-            election.options,
-        );
-
-        if (converter.isValid()) {
-            this.persistence.save<VoteDTO>('vote', {
-                ...vote,
-                electionId: id,
-                id: shortid.generate(),
-                createdAt: new Date(),
-            });
-        }
-        return converter.isValid();
+    public createItem(item: any) {
+        this.persistence.save('item', item);
+        return item;
     }
+}
 
-    public getElectionResult(id: string): ElectionResult {
-        const election = this.persistence.getOne<Election>('election', id);
-        const pairwisePreferences = new Matrix(election.options.length);
-
-        const votes = this.persistence.getFiltered<VoteDTO>('vote', {
-            electionId: id,
-        });
-
-        for (const vote of votes) {
-            const converter = new PreferenceListToMatrix(
-                vote.preferenceList,
-                election.options,
-            );
-
-            pairwisePreferences.add(converter.getMatrix());
-        }
-
-        const strongestPathes = pairwisePreferences.floydWarshall();
-
-        const total = [];
-        for (let i = 0; i < strongestPathes.n; i++) {
-            let c = 0;
-            for (let j = 0; j < strongestPathes.n; j++) {
-                c =
-                    strongestPathes.cells[i][j] > strongestPathes.cells[j][i]
-                        ? c + 1
-                        : c;
-            }
-            total.push(c);
-        }
-
-        const compare = (a, b) => total[b] - total[a];
-
-        const order = Util.simplifyArray(
-            Util.groupSame(compare)(
-                Util.sort(compare)(
-                    Util.createAscendingVector(election.options.length),
-                ),
-            ),
-        );
-
-        return {
-            pairwisePreferences,
-            strongestPathes,
-            order,
-            total: order.map(x => {
-                if (typeof x === 'object') {
-                    return x.map(y => total[y]);
-                } else {
-                    return total[x];
-                }
-            }),
-        };
+function arrify(arr: any[] | undefined): any[] {
+    if (!arr) {
+        return [];
     }
+    return arr;
 }
