@@ -1,3 +1,4 @@
+import * as cors from 'cors';
 import * as express from 'express';
 import * as http from 'http';
 import * as ioLib from 'socket.io';
@@ -7,14 +8,15 @@ import { IdGenerator } from '../logic/idGenerator/IdGenerator';
 import { TYPES } from '../types';
 
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 const io = ioLib(server);
 
 const business = serverContainer.get<Business>(TYPES.Business);
 const idGenerator = serverContainer.get<IdGenerator>(TYPES.IdGenerator);
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+app.get('/', (_, res) => {
+    res.send({ hello: 'world' });
 });
 
 io.on('connection', socket => {
