@@ -19,6 +19,13 @@ app.get('/', (_, res) => {
     res.send({ hello: 'world' });
 });
 
+io.origins((origin, callback) => {
+    // if (origin !== 'http://orion.zsiri.eu') {
+    //   return callback('origin not allowed', false);
+    // }
+    callback(null, true);
+});
+
 io.on('connection', socket => {
     // tslint:disable-next-line: no-console
     console.log('a user connected');
