@@ -30,41 +30,28 @@ io.on('connection', socket => {
     // tslint:disable-next-line: no-console
     console.log('a user connected');
 
-    socket.on('createItem', (data: any) => {
-        business.createItem(data.data.item);
-        io.emit('createdItem', data);
-    });
+    socket.on('changeItem', (data: any) => {
+        // tslint:disable-next-line: no-console
+        console.log('changeItem', data);
+        const { acceptedMessage, conflictedMessage } = business.changeItem(
+            data,
+        );
 
-    socket.on('createRelation', (data: any) => {
-        business.createRelation(data.data);
-        io.emit('createdRelation', data);
-    });
+        // tslint:disable-next-line: no-console
+        console.log('accepted', acceptedMessage);
+        // tslint:disable-next-line: no-console
+        console.log('conflicted', conflictedMessage);
 
-    socket.on('updateItem', (data: any) => {
-        business.updateItem(data.data);
-        setTimeout(() => io.emit('updatedItem', data), 1000);
-    });
+        if (acceptedMessage) {
+            socket.emit('changeItemAccepted', acceptedMessage);
+            socket.broadcast.emit('changeItemHappened', acceptedMessage);
+        }
 
-    socket.on('getItem', ({ id }) => {
-        const item = business.getItem(id);
-        socket.emit('gotItem', toChange(item));
-    });
-
-    socket.on('getAllItem', () => {
-        const items = business.getAllItem();
-        socket.emit('gotAllItem', items.map(toChange));
+        if (conflictedMessage) {
+            socket.emit('changeItemConflicted', conflictedMessage);
+        }
     });
 });
-
-function toChange(item) {
-    return {
-        type: 'GetItem',
-        id: idGenerator.generate(),
-        data: {
-            item,
-        },
-    };
-}
 
 server.listen(8902, () => {
     // tslint:disable-next-line: no-console

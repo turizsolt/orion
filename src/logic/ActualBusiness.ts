@@ -2,46 +2,52 @@ import { inject, injectable } from 'inversify';
 import * as shortid from 'shortid';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
-import { Business, Item, ItemId } from './Business';
+import { Business, Change, Item } from './Business';
 
 @injectable()
 export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
 
-    public updateItem(data: any) {
-        const item = this.persistence.getOne<Item>('item', data.itemId);
-        item.fields[data.field] = data.newValue;
-        this.persistence.save('item', item);
-        return data;
-    }
+    public changeItem(data: any) {
+        const storedItem = this.persistence.getOne<Item>('item', data.id);
+        const item: any = storedItem || { id: data.id, fields: {} };
 
-    public createRelation(data: any) {
-        const itemParent = this.persistence.getOne<Item>('item', data.parentId);
-        const itemChild = this.persistence.getOne<Item>('item', data.childId);
-        itemParent.fields.children = [
-            ...arrify(itemParent.fields.children),
-            data.childId,
-        ];
-        itemChild.fields.parents = [
-            ...arrify(itemParent.fields.parents),
-            data.parentId,
-        ];
-        this.persistence.save('item', itemParent);
-        this.persistence.save('item', itemChild);
-        return data;
-    }
+        const conflictedChanges = [];
+        const acceptedChanges = [];
+        let conflictedMessage = null;
+        let acceptedMessage = null;
+        const changes: Change[] = data.changes;
+        for (const change of changes) {
+            if (
+                !item.fields[change.field] ||
+                item.fields[change.field] === change.oldValue
+            ) {
+                acceptedChanges.push(change);
+                item.fields[change.field] = change.newValue;
+            } else {
+                conflictedChanges.push({
+                    ...change,
+                    serverValue: item.fields[change.field],
+                });
+            }
+        }
 
-    public getItem(id: ItemId) {
-        return this.persistence.getOne('item', id);
-    }
+        if (acceptedChanges.length > 0) {
+            this.persistence.update('item', item.id, item);
+            acceptedMessage = {
+                id: item.id,
+                changes: acceptedChanges,
+            };
+        }
 
-    public getAllItem() {
-        return this.persistence.getAll('item');
-    }
+        if (conflictedChanges.length > 0) {
+            conflictedMessage = {
+                id: item.id,
+                changes: conflictedChanges,
+            };
+        }
 
-    public createItem(item: any) {
-        this.persistence.save('item', item);
-        return item;
+        return { acceptedMessage, conflictedMessage };
     }
 }
 
