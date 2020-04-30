@@ -29,6 +29,8 @@ io.origins((origin, callback) => {
 io.on('connection', socket => {
     // tslint:disable-next-line: no-console
     console.log('a user connected');
+    const allItem = business.getAllItem();
+    socket.emit('allItem', allItem);
 
     socket.on('changeItem', (data: any) => {
         // tslint:disable-next-line: no-console
@@ -50,6 +52,11 @@ io.on('connection', socket => {
         if (conflictedMessage) {
             socket.emit('changeItemConflicted', conflictedMessage);
         }
+    });
+
+    socket.on('disconnect', reason => {
+        // tslint:disable-next-line: no-console
+        console.log('a user disconnected', reason);
     });
 });
 

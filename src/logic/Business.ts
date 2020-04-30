@@ -1,5 +1,6 @@
 export interface Business {
     changeItem(data: any);
+    getAllItem();
 }
 
 // todo not the real Item interface

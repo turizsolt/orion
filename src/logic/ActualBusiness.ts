@@ -49,6 +49,12 @@ export class ActualBusiness implements Business {
 
         return { acceptedMessage, conflictedMessage };
     }
+
+    public getAllItem() {
+        const items = this.persistence.getAll<Item>('item');
+        // tslint:disable-next-line: no-console
+        console.log('items', items);
+    }
 }
 
 function arrify(arr: any[] | undefined): any[] {
