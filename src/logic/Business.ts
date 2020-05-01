@@ -5,8 +5,8 @@ export interface Business {
 
 // todo not the real Item interface
 export interface Item {
-    children: ItemId[];
-    fields: any;
+    id: ItemId;
+    fields: Record<string, any>;
 }
 
 export interface Change {

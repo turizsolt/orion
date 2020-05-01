@@ -53,7 +53,19 @@ export class ActualBusiness implements Business {
     public getAllItem() {
         const items = this.persistence.getAll<Item>('item');
         // tslint:disable-next-line: no-console
-        console.log('items', items);
+        return items.map(item => {
+            const returnedItem = {
+                id: item.id,
+                changes: [],
+            };
+            for (const key of Object.keys(item.fields)) {
+                returnedItem.changes.push({
+                    field: key,
+                    serverValue: item.fields[key],
+                });
+            }
+            return returnedItem;
+        });
     }
 }
 

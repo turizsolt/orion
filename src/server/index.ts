@@ -30,6 +30,8 @@ io.on('connection', socket => {
     // tslint:disable-next-line: no-console
     console.log('a user connected');
     const allItem = business.getAllItem();
+    // tslint:disable-next-line: no-console
+    console.log('allItem', allItem);
     socket.emit('allItem', allItem);
 
     socket.on('changeItem', (data: any) => {
