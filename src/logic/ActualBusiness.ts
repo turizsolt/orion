@@ -10,7 +10,11 @@ export class ActualBusiness implements Business {
 
     public changeItem(data: any) {
         const storedItem = this.persistence.getOne<Item>('item', data.id);
-        const item: any = storedItem || { id: data.id, fields: {} };
+        const item: any = storedItem || {
+            id: data.id,
+            fields: {},
+            relations: [],
+        };
 
         const conflictedChanges = [];
         const acceptedChanges = [];
@@ -50,6 +54,82 @@ export class ActualBusiness implements Business {
         return { acceptedMessage, conflictedMessage };
     }
 
+    public addRelation(data: any) {
+        const item1 = this.persistence.getOne<Item>('item', data.oneSideId);
+        const item2 = this.persistence.getOne<Item>('item', data.otherSideId);
+        if (!item1.relations) {
+            item1.relations = [];
+        }
+        if (!item2.relations) {
+            item2.relations = [];
+        }
+        const index1 = item1.relations.findIndex(
+            x => x.type === data.relation && x.otherSideId === data.otherSideId,
+        );
+        const index2 = item2.relations.findIndex(
+            x =>
+                x.type === opposite(data.relation) &&
+                x.otherSideId === data.oneSideId,
+        );
+        if (index1 === -1 && index2 === -1) {
+            item1.relations.push({
+                type: data.relation,
+                otherSideId: data.otherSideId,
+            });
+            item2.relations.push({
+                type: opposite(data.relation),
+                otherSideId: data.oneSideId,
+            });
+
+            this.persistence.update<Item>('item', item1.id, item1);
+            this.persistence.update<Item>('item', item2.id, item2);
+            return false;
+        }
+
+        if (index1 !== -1 && index2 !== -1) {
+            return true;
+        }
+
+        // todo handle error somehow
+    }
+
+    public removeRelation(data: any) {
+        const item1 = this.persistence.getOne<Item>('item', data.oneSideId);
+        const item2 = this.persistence.getOne<Item>('item', data.otherSideId);
+
+        const index1 = item1.relations.findIndex(
+            x => x.type === data.relation && x.otherSideId === data.otherSideId,
+        );
+        const index2 = item2.relations.findIndex(
+            x =>
+                x.type === opposite(data.relation) &&
+                x.otherSideId === data.oneSideId,
+        );
+        if (index1 === -1 && index2 === -1) {
+            return false;
+        }
+
+        if (index1 !== -1 && index2 !== -1) {
+            item1.relations = item1.relations.filter(
+                x =>
+                    x.type !== data.relation ||
+                    x.otherSideId !== data.otherSideId,
+            );
+            item2.relations = item2.relations.filter(
+                x =>
+                    x.type !== opposite(data.relation) ||
+                    x.otherSideId !== data.oneSideId,
+            );
+
+            this.persistence.update<Item>('item', item1.id, item1);
+            this.persistence.update<Item>('item', item2.id, item2);
+
+            return true;
+        }
+
+        // todo handle error somehow
+    }
+
     public getAllItem() {
         const items = this.persistence.getAll<Item>('item');
         // tslint:disable-next-line: no-console
@@ -74,4 +154,11 @@ function arrify(arr: any[] | undefined): any[] {
         return [];
     }
     return arr;
+}
+
+function opposite(x: string): string {
+    if (x === 'child') {
+        return 'parent';
+    }
+    return 'child';
 }

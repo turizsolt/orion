@@ -56,6 +56,36 @@ io.on('connection', socket => {
         }
     });
 
+    socket.on('addRelation', data => {
+        // tslint:disable-next-line: no-console
+        console.log('addRelation', data);
+        const exists = business.addRelation(data);
+
+        if (exists === true) {
+            socket.emit('addRelationAlreadyExists', data);
+        }
+
+        if (exists === false) {
+            socket.emit('addRelationAccepted', data);
+            socket.broadcast.emit('addRelationHappened', data);
+        }
+    });
+
+    socket.on('removeRelation', data => {
+        // tslint:disable-next-line: no-console
+        console.log('removeRelation', data);
+        const exists = business.removeRelation(data);
+
+        if (exists === true) {
+            socket.emit('removeRelationAccepted', data);
+            socket.broadcast.emit('removeRelationHappened', data);
+        }
+
+        if (exists === false) {
+            socket.emit('removeRelationAlreadyExists', data);
+        }
+    });
+
     socket.on('disconnect', reason => {
         // tslint:disable-next-line: no-console
         console.log('a user disconnected', reason);

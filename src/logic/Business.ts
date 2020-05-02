@@ -1,12 +1,19 @@
 export interface Business {
     changeItem(data: any);
+    addRelation(data: any);
+    removeRelation(data: any);
     getAllItem();
 }
 
-// todo not the real Item interface
 export interface Item {
     id: ItemId;
     fields: Record<string, any>;
+    relations: Relation[];
+}
+
+export interface Relation {
+    type: string;
+    otherSideId: ItemId;
 }
 
 export interface Change {
