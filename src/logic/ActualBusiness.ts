@@ -137,6 +137,7 @@ export class ActualBusiness implements Business {
             const returnedItem = {
                 id: item.id,
                 changes: [],
+                relations: item.relations,
             };
             for (const key of Object.keys(item.fields)) {
                 returnedItem.changes.push({
