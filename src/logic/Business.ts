@@ -1,14 +1,25 @@
 export interface Business {
-    createItem(item: any);
-    createRelation(data: any);
-    updateItem(data: any);
-    getItem(id: ItemId);
+    changeItem(data: any);
+    addRelation(data: any);
+    removeRelation(data: any);
     getAllItem();
 }
 
 export interface Item {
-    children: ItemId[];
-    fields: any;
+    id: ItemId;
+    fields: Record<string, any>;
+    relations: Relation[];
+}
+
+export interface Relation {
+    type: string;
+    otherSideId: ItemId;
+}
+
+export interface Change {
+    field: string;
+    oldValue: any;
+    newValue: any;
 }
 
 export type ItemId = string;

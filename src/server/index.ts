@@ -29,42 +29,68 @@ io.origins((origin, callback) => {
 io.on('connection', socket => {
     // tslint:disable-next-line: no-console
     console.log('a user connected');
+    const allItem = business.getAllItem();
+    // tslint:disable-next-line: no-console
+    console.log('allItem', allItem);
+    socket.emit('allItem', allItem);
 
-    socket.on('createItem', (data: any) => {
-        business.createItem(data.data.item);
-        io.emit('createdItem', data);
+    socket.on('changeItem', (data: any) => {
+        // tslint:disable-next-line: no-console
+        console.log('changeItem', data);
+        const { acceptedMessage, conflictedMessage } = business.changeItem(
+            data,
+        );
+
+        // tslint:disable-next-line: no-console
+        console.log('accepted', acceptedMessage);
+        // tslint:disable-next-line: no-console
+        console.log('conflicted', conflictedMessage);
+
+        if (acceptedMessage) {
+            socket.emit('changeItemAccepted', acceptedMessage);
+            socket.broadcast.emit('changeItemHappened', acceptedMessage);
+        }
+
+        if (conflictedMessage) {
+            socket.emit('changeItemConflicted', conflictedMessage);
+        }
     });
 
-    socket.on('createRelation', (data: any) => {
-        business.createRelation(data.data);
-        io.emit('createdRelation', data);
+    socket.on('addRelation', data => {
+        // tslint:disable-next-line: no-console
+        console.log('addRelation', data);
+        const exists = business.addRelation(data);
+
+        if (exists === true) {
+            socket.emit('addRelationAlreadyExists', data);
+        }
+
+        if (exists === false) {
+            socket.emit('addRelationAccepted', data);
+            socket.broadcast.emit('addRelationHappened', data);
+        }
     });
 
-    socket.on('updateItem', (data: any) => {
-        business.updateItem(data.data);
-        setTimeout(() => io.emit('updatedItem', data), 1000);
+    socket.on('removeRelation', data => {
+        // tslint:disable-next-line: no-console
+        console.log('removeRelation', data);
+        const exists = business.removeRelation(data);
+
+        if (exists === true) {
+            socket.emit('removeRelationAccepted', data);
+            socket.broadcast.emit('removeRelationHappened', data);
+        }
+
+        if (exists === false) {
+            socket.emit('removeRelationAlreadyExists', data);
+        }
     });
 
-    socket.on('getItem', ({ id }) => {
-        const item = business.getItem(id);
-        socket.emit('gotItem', toChange(item));
-    });
-
-    socket.on('getAllItem', () => {
-        const items = business.getAllItem();
-        socket.emit('gotAllItem', items.map(toChange));
+    socket.on('disconnect', reason => {
+        // tslint:disable-next-line: no-console
+        console.log('a user disconnected', reason);
     });
 });
-
-function toChange(item) {
-    return {
-        type: 'GetItem',
-        id: idGenerator.generate(),
-        data: {
-            item,
-        },
-    };
-}
 
 server.listen(8902, () => {
     // tslint:disable-next-line: no-console

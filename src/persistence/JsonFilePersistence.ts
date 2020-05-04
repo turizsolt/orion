@@ -8,7 +8,7 @@ const db = low(adapter);
 import { injectable } from 'inversify';
 import { Persistence } from './Persistence';
 
-db.defaults({ item: [] }).write();
+db.defaults({ item: [], change: [] }).write();
 
 @injectable()
 export class JsonFilePersistence implements Persistence {
@@ -17,10 +17,15 @@ export class JsonFilePersistence implements Persistence {
         id: string,
         record: Record,
     ): void {
-        db.get(collectionName)
-            .find({ id })
-            .assign(record)
-            .write();
+        const one = this.getOne<Record>(collectionName, id);
+        if (one) {
+            db.get(collectionName)
+                .find({ id })
+                .assign(record)
+                .write();
+        } else {
+            this.save<Record>(collectionName, record);
+        }
     }
 
     public save<Record>(collectionName: string, record: Record): void {
@@ -34,17 +39,10 @@ export class JsonFilePersistence implements Persistence {
     }
 
     public getOne<Record>(collectionName: string, id: string): Record {
-        const one = db
+        return db
             .get(collectionName)
             .find({ id })
             .value();
-
-        if (one === undefined) {
-            // todo this throw really should not depend on http
-            throw new httpErrors.NotFound();
-        }
-
-        return one;
     }
 
     public getFiltered<Record>(collectionName: string, filter: any): Record[] {

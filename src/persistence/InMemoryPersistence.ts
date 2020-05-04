@@ -3,7 +3,7 @@ import { injectable } from 'inversify';
 import { Persistence } from './Persistence';
 const httpErrors = require('http-errors');
 
-const db = { item: [] };
+const db = { item: [], change: [] };
 
 @injectable()
 export class InMemoryPersistence implements Persistence {
@@ -25,14 +25,7 @@ export class InMemoryPersistence implements Persistence {
     }
 
     public getOne<Record>(collectionName: string, id: string): Record {
-        const one = db[collectionName].find(x => x.id === id);
-
-        if (one === undefined) {
-            // todo this throw really should not depend on http
-            throw new httpErrors.NotFound();
-        }
-
-        return one;
+        return db[collectionName].find(x => x.id === id);
     }
 
     public getFiltered<Record>(collectionName: string, filter: any): Record[] {
