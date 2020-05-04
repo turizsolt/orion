@@ -1,15 +1,25 @@
 import * as cors from 'cors';
 import * as express from 'express';
-import * as http from 'http';
 import * as ioLib from 'socket.io';
 import { serverContainer } from '../inversify.config';
 import { Business } from '../logic/Business';
 import { IdGenerator } from '../logic/idGenerator/IdGenerator';
 import { TYPES } from '../types';
 
+import * as fs from 'fs';
+import * as https from 'https';
+
 const app = express();
 app.use(cors());
-const server = http.createServer(app);
+
+const config: any = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+
+const secureData = {
+    key: fs.readFileSync(config.key),
+    cert: fs.readFileSync(config.cert),
+};
+const server = https.createServer(secureData, app);
+
 const io = ioLib(server, { transport: ['websocket'], origins: '*' });
 
 const business = serverContainer.get<Business>(TYPES.Business);
