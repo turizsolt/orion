@@ -7,6 +7,7 @@ import { IdGenerator } from '../logic/idGenerator/IdGenerator';
 import { TYPES } from '../types';
 
 import * as fs from 'fs';
+import * as http from 'http';
 import * as https from 'https';
 
 const app = express();
@@ -18,7 +19,9 @@ const secureData = {
     key: fs.readFileSync(config.key),
     cert: fs.readFileSync(config.cert),
 };
-const server = https.createServer(secureData, app);
+const server = config.ssl
+    ? https.createServer(secureData, app)
+    : http.createServer(app);
 
 const io = ioLib(server, { transport: ['websocket'], origins: '*' });
 
