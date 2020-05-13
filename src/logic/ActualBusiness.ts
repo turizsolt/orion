@@ -1,5 +1,4 @@
 import { inject, injectable } from 'inversify';
-import * as shortid from 'shortid';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
 import { Business, Change, Item } from './Business';
@@ -9,49 +8,27 @@ export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
 
     public changeItem(data: any) {
-        const storedItem = this.persistence.getOne<Item>('item', data.id);
+        const storedItem = this.persistence.getOne<Item>('item', data.itemId);
         const item: any = storedItem || {
-            id: data.id,
+            id: data.itemId,
             fields: {},
             relations: [],
         };
 
-        const conflictedChanges = [];
-        const acceptedChanges = [];
-        let conflictedMessage = null;
-        let acceptedMessage = null;
-        const changes: Change[] = data.changes;
-        for (const change of changes) {
-            if (
-                !item.fields[change.field] ||
-                item.fields[change.field] === change.oldValue
-            ) {
-                acceptedChanges.push(change);
-                item.fields[change.field] = change.newValue;
-            } else {
-                conflictedChanges.push({
-                    ...change,
-                    serverValue: item.fields[change.field],
-                });
-            }
-        }
-
-        if (acceptedChanges.length > 0) {
-            this.persistence.update('item', item.id, item);
-            acceptedMessage = {
-                id: item.id,
-                changes: acceptedChanges,
+        const change = data;
+        if (
+            !item.fields[change.field] ||
+            item.fields[change.field] === change.oldValue
+        ) {
+            item.fields[change.field] = change.newValue;
+            return { ...change, response: 'accepted' };
+        } else {
+            return {
+                ...change,
+                oldValue: item.fields[change.field],
+                response: 'rejected',
             };
         }
-
-        if (conflictedChanges.length > 0) {
-            conflictedMessage = {
-                id: item.id,
-                changes: conflictedChanges,
-            };
-        }
-
-        return { acceptedMessage, conflictedMessage };
     }
 
     public addRelation(data: any) {
