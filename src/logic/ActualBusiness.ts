@@ -7,20 +7,20 @@ import { Business, Change, Item } from './Business';
 export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
 
-    public changeItem(data: any) {
-        const storedItem = this.persistence.getOne<Item>('item', data.itemId);
+    public changeItem(change: any) {
+        const storedItem = this.persistence.getOne<Item>('item', change.itemId);
         const item: any = storedItem || {
-            id: data.itemId,
+            id: change.itemId,
             fields: {},
             relations: [],
         };
 
-        const change = data;
         if (
             !item.fields[change.field] ||
             item.fields[change.field] === change.oldValue
         ) {
             item.fields[change.field] = change.newValue;
+            this.persistence.update<Item>('item', item.id, item);
             return { ...change, response: 'accepted' };
         } else {
             return {
@@ -31,9 +31,9 @@ export class ActualBusiness implements Business {
         }
     }
 
-    public addRelation(data: any) {
-        const item1 = this.persistence.getOne<Item>('item', data.oneSideId);
-        const item2 = this.persistence.getOne<Item>('item', data.otherSideId);
+    public addRelation(change: any) {
+        const item1 = this.persistence.getOne<Item>('item', change.oneSideId);
+        const item2 = this.persistence.getOne<Item>('item', change.otherSideId);
         if (!item1.relations) {
             item1.relations = [];
         }
@@ -41,67 +41,71 @@ export class ActualBusiness implements Business {
             item2.relations = [];
         }
         const index1 = item1.relations.findIndex(
-            x => x.type === data.relation && x.otherSideId === data.otherSideId,
+            x =>
+                x.type === change.relation &&
+                x.otherSideId === change.otherSideId,
         );
         const index2 = item2.relations.findIndex(
             x =>
-                x.type === opposite(data.relation) &&
-                x.otherSideId === data.oneSideId,
+                x.type === opposite(change.relation) &&
+                x.otherSideId === change.oneSideId,
         );
         if (index1 === -1 && index2 === -1) {
             item1.relations.push({
-                type: data.relation,
-                otherSideId: data.otherSideId,
+                type: change.relation,
+                otherSideId: change.otherSideId,
             });
             item2.relations.push({
-                type: opposite(data.relation),
-                otherSideId: data.oneSideId,
+                type: opposite(change.relation),
+                otherSideId: change.oneSideId,
             });
 
             this.persistence.update<Item>('item', item1.id, item1);
             this.persistence.update<Item>('item', item2.id, item2);
-            return false;
+            return { ...change, response: 'accepted' };
         }
 
         if (index1 !== -1 && index2 !== -1) {
-            return true;
+            return { ...change, response: 'rejected' };
         }
 
         // todo handle error somehow
     }
 
-    public removeRelation(data: any) {
-        const item1 = this.persistence.getOne<Item>('item', data.oneSideId);
-        const item2 = this.persistence.getOne<Item>('item', data.otherSideId);
+    public removeRelation(change: any) {
+        const item1 = this.persistence.getOne<Item>('item', change.oneSideId);
+        const item2 = this.persistence.getOne<Item>('item', change.otherSideId);
 
         const index1 = item1.relations.findIndex(
-            x => x.type === data.relation && x.otherSideId === data.otherSideId,
+            x =>
+                x.type === change.relation &&
+                x.otherSideId === change.otherSideId,
         );
         const index2 = item2.relations.findIndex(
             x =>
-                x.type === opposite(data.relation) &&
-                x.otherSideId === data.oneSideId,
+                x.type === opposite(change.relation) &&
+                x.otherSideId === change.oneSideId,
         );
         if (index1 === -1 && index2 === -1) {
-            return false;
+            return { ...change, response: 'rejected' };
         }
 
         if (index1 !== -1 && index2 !== -1) {
             item1.relations = item1.relations.filter(
                 x =>
-                    x.type !== data.relation ||
-                    x.otherSideId !== data.otherSideId,
+                    x.type !== change.relation ||
+                    x.otherSideId !== change.otherSideId,
             );
             item2.relations = item2.relations.filter(
                 x =>
-                    x.type !== opposite(data.relation) ||
-                    x.otherSideId !== data.oneSideId,
+                    x.type !== opposite(change.relation) ||
+                    x.otherSideId !== change.oneSideId,
             );
 
             this.persistence.update<Item>('item', item1.id, item1);
             this.persistence.update<Item>('item', item2.id, item2);
 
-            return true;
+            return { ...change, response: 'accepted' };
         }
 
         // todo handle error somehow

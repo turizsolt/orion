@@ -5,7 +5,11 @@ import * as ioLib from 'socket.io';
 import * as fs from 'fs';
 import * as http from 'http';
 import * as https from 'https';
-import { changeItem } from './Handlers';
+import { serverContainer } from '../inversify.config';
+import { Business } from '../logic/Business';
+import { TYPES } from '../types';
+
+const business = serverContainer.get<Business>(TYPES.Business);
 
 const app = express();
 app.use(cors());
@@ -48,15 +52,15 @@ io.on('connection', socket => {
         for (const change of data.changes) {
             switch (change.type) {
                 case 'ItemChange':
-                    response.push(changeItem(change));
+                    response.push(business.changeItem(change));
                     break;
 
                 case 'AddRelation':
-                    // changeItem(socket, data);
+                    response.push(business.addRelation(change));
                     break;
 
                 case 'RemoveRelation':
-                    // changeItem(socket, data);
+                    response.push(business.removeRelation(change));
                     break;
             }
         }
