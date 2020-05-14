@@ -106,10 +106,11 @@ export class ActualBusiness implements Business {
     public getAllItem() {
         const items = this.persistence.getAll<Item>('item');
         // tslint:disable-next-line: no-console
-        const changes = [];
+        const itemChanges = [];
+        const relChanges = [];
         items.map(item => {
             for (const key of Object.keys(item.fields)) {
-                changes.push({
+                itemChanges.push({
                     type: 'ItemChange',
                     itemId: item.id,
                     changeId: undefined,
@@ -121,7 +122,7 @@ export class ActualBusiness implements Business {
             }
 
             for (const relation of item.relations) {
-                changes.push({
+                relChanges.push({
                     type: relation.deleted ? 'RemoveRelation' : 'AddRelation',
                     changeId: undefined,
                     oneSideId: item.id,
@@ -131,7 +132,10 @@ export class ActualBusiness implements Business {
                 });
             }
         });
-        return { transactionId: undefined, changes };
+        return {
+            transactionId: undefined,
+            changes: itemChanges.concat(relChanges),
+        };
     }
 }
 
