@@ -40,10 +40,10 @@ io.origins((origin, callback) => {
 io.on('connection', socket => {
     // tslint:disable-next-line: no-console
     console.log('a user connected');
-    // const allItem = business.getAllItem();
+    const allItem = business.getAllItem();
     // tslint:disable-next-line: no-console
-    // console.log('allItem', allItem);
-    // socket.emit('allItem', allItem);
+    console.log('allItem', allItem);
+    socket.emit('allItem', allItem);
 
     socket.on('transaction', (data: any) => {
         // tslint:disable-next-line: no-console

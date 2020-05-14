@@ -114,20 +114,21 @@ export class ActualBusiness implements Business {
     public getAllItem() {
         const items = this.persistence.getAll<Item>('item');
         // tslint:disable-next-line: no-console
-        return items.map(item => {
-            const returnedItem = {
-                id: item.id,
-                changes: [],
-                relations: item.relations,
-            };
+        const changes = [];
+        items.map(item => {
             for (const key of Object.keys(item.fields)) {
-                returnedItem.changes.push({
+                changes.push({
+                    type: 'ItemChange',
+                    itemId: item.id,
+                    changeId: undefined,
                     field: key,
-                    serverValue: item.fields[key],
+                    oldValue: item.fields[key],
+                    newValue: item.fields[key],
+                    response: 'serverUpdate',
                 });
             }
-            return returnedItem;
         });
+        return { transactionId: undefined, changes };
     }
 }
 
