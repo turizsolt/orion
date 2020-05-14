@@ -14,6 +14,7 @@ export interface Item {
 export interface Relation {
     type: string;
     otherSideId: ItemId;
+    deleted?: boolean;
 }
 
 export interface Change {

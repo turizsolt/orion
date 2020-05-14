@@ -91,16 +91,8 @@ export class ActualBusiness implements Business {
         }
 
         if (index1 !== -1 && index2 !== -1) {
-            item1.relations = item1.relations.filter(
-                x =>
-                    x.type !== change.relation ||
-                    x.otherSideId !== change.otherSideId,
-            );
-            item2.relations = item2.relations.filter(
-                x =>
-                    x.type !== opposite(change.relation) ||
-                    x.otherSideId !== change.oneSideId,
-            );
+            item1.relations[index1].deleted = true;
+            item2.relations[index2].deleted = true;
 
             this.persistence.update<Item>('item', item1.id, item1);
             this.persistence.update<Item>('item', item2.id, item2);
@@ -127,16 +119,20 @@ export class ActualBusiness implements Business {
                     response: 'serverUpdate',
                 });
             }
+
+            for (const relation of item.relations) {
+                changes.push({
+                    type: relation.deleted ? 'RemoveRelation' : 'AddRelation',
+                    changeId: undefined,
+                    oneSideId: item.id,
+                    relation: relation.type,
+                    otherSideId: relation.otherSideId,
+                    response: 'serverUpdate',
+                });
+            }
         });
         return { transactionId: undefined, changes };
     }
-}
-
-function arrify(arr: any[] | undefined): any[] {
-    if (!arr) {
-        return [];
-    }
-    return arr;
 }
 
 function opposite(x: string): string {
