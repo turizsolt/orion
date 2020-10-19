@@ -140,8 +140,14 @@ export class ActualBusiness implements Business {
 }
 
 function opposite(x: string): string {
-    if (x === 'child') {
-        return 'parent';
+    switch (x) {
+        case 'children':
+            return 'parent';
+        case 'parent':
+            return 'children';
+        case 'hash':
+            return 'hashof';
+        case 'hashof':
+            return 'hash';
     }
-    return 'child';
 }
