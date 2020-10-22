@@ -149,5 +149,9 @@ function opposite(x: string): string {
             return 'hashof';
         case 'hashof':
             return 'hash';
+        case 'responsible':
+            return 'responsibleof';
+        case 'responsibleof':
+            return 'responsible';
     }
 }
