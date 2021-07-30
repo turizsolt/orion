@@ -10,6 +10,16 @@
 yarn
 ```
 
+You should create a config.json file in the root directory. If ssl set to false, key and cert are not important. If set to true, the files should also exists with the corresponding credentials.
+
+```json
+{
+    "key": "config/server.key",
+    "cert": "config/server.cert",
+    "ssl": false
+}
+```
+
 ## Testing and coverage report
 
 ```bash

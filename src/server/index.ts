@@ -16,10 +16,10 @@ app.use(cors());
 
 const config: any = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
-const secureData = {
+const secureData = config.ssl ? {
     key: fs.readFileSync(config.key),
     cert: fs.readFileSync(config.cert),
-};
+} : {};
 const server = config.ssl
     ? https.createServer(secureData, app)
     : http.createServer(app);
