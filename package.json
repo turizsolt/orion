@@ -10,7 +10,7 @@
     "build": "webpack",
     "start": "webpack && node build/index.js",
     "start:dev": "NODE_ENV=development webpack",
-    "run:dev": "NODE_ENV=development nodemon build/index.js",
+    "run:dev": "NODE_ENV=development nodemon --ignore build/* build/index.js",
     "lint": "tslint -c tslint.json src/**/*.{ts,tsx} --fix --format verbose",
     "clear": "rm -r build/* || true",
     "test:only": "mocha -r ts-node/register test/**/*.{ts,tsx}",
