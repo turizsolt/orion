@@ -8,6 +8,8 @@ import * as https from 'https';
 import { serverContainer } from '../inversify.config';
 import { Business } from '../logic/Business';
 import { TYPES } from '../types';
+import { IdGenerator } from '../logic/idGenerator/IdGenerator';
+import { ActualIdGenerator } from '../logic/idGenerator/ActualIdGenerator';
 
 const business = serverContainer.get<Business>(TYPES.Business);
 
@@ -25,6 +27,8 @@ const server = config.ssl
     : http.createServer(app);
 
 const io = ioLib(server, { transport: ['websocket'], origins: '*' });
+
+const idGen: IdGenerator = new ActualIdGenerator();
 
 app.get('/', (_, res) => {
     res.send({ hello: 'world' });
@@ -65,8 +69,11 @@ io.on('connection', socket => {
             }
         }
 
-        const forward = response
-            .filter(x => x.response === 'accepted')
+        const changes = response
+            .filter(x => x.response === 'accepted');
+        business.saveTransaction({ id: idGen.generate(), changes });
+
+        const forward = changes
             .map(x => ({ ...x, response: 'happened' }));
 
         socket.emit('transaction', {
