@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
-import { Business, Change, Item } from './Business';
+import { Business, Item, Transaction } from './Business';
 
 @injectable()
 export class ActualBusiness implements Business {
@@ -101,6 +101,10 @@ export class ActualBusiness implements Business {
         }
 
         // todo handle error somehow
+    }
+
+    public saveTransaction(transaction: Transaction): void {
+        this.persistence.save<Transaction>('transaction', transaction);
     }
 
     public getAllItem() {

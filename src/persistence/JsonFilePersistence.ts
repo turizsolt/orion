@@ -8,7 +8,7 @@ const db = low(adapter);
 import { injectable } from 'inversify';
 import { Persistence } from './Persistence';
 
-db.defaults({ item: [], change: [] }).write();
+db.defaults({ item: [], transaction: [] }).write();
 
 @injectable()
 export class JsonFilePersistence implements Persistence {
