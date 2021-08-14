@@ -3,6 +3,7 @@ export interface Business {
     addRelation(data: any);
     removeRelation(data: any);
     getAllItem();
+    saveTransaction(transaction: Transaction): void;
 }
 
 export interface Item {
@@ -21,6 +22,11 @@ export interface Change {
     field: string;
     oldValue: any;
     newValue: any;
+}
+
+export interface Transaction {
+    id: string;
+    changes: Change[];
 }
 
 export type ItemId = string;
