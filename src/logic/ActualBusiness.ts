@@ -1,11 +1,13 @@
 import { inject, injectable } from 'inversify';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
-import { Business, Item, Transaction } from './Business';
+import { Business, Change, Item, Transaction } from './Business';
+import { IdGenerator } from './idGenerator/IdGenerator';
 
 @injectable()
 export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
+    @inject(TYPES.IdGenerator) private idGen: IdGenerator;
 
     public changeItem(change: any) {
         const storedItem = this.persistence.getOne<Item>('item', change.itemId);
@@ -104,6 +106,7 @@ export class ActualBusiness implements Business {
     }
 
     public saveTransaction(transaction: Transaction): void {
+        transaction.id = this.idGen.generate();
         this.persistence.save<Transaction>('transaction', transaction);
     }
 
@@ -140,6 +143,63 @@ export class ActualBusiness implements Business {
             transactionId: undefined,
             changes: itemChanges.concat(relChanges),
         };
+    }
+
+    public runGenerators(day: number, weekday: number): Transaction {
+        const items = this.persistence.getAll<Item>('item');
+        const generatorItems: Item[] =
+            items.filter(x => x.fields['generator']);
+
+        const changes = generatorItems.map(gItem => {
+            try {
+                const json: any[] = JSON.parse(gItem.fields['generator']);
+                if (json.length > 0) {
+                    if (json.some(condition => {
+                        let result = false;
+
+                        if (condition.weekday) {
+                            if (condition.weekday === weekday) {
+                                result = true;
+                            } else return false;
+                        }
+
+                        if (condition.day) {
+                            if (condition.day === day) {
+                                result = true;
+                            } else return false;
+                        }
+
+                        return result;
+                    })) {
+                        return this.applyGenerator(gItem);
+                    }
+                }
+            } catch (e) {
+                return undefined as Change;
+            }
+        }).filter(x => x);
+
+        if (changes.length > 0) {
+            return {
+                id: this.idGen.generate(),
+                changes
+            }
+        }
+    }
+
+    private applyGenerator(gItem: Item): Change {
+        if (gItem.fields['state'] === 'done') {
+            return this.changeItem({
+                type: 'ItemChange',
+                itemId: gItem.id,
+                changeId: this.idGen.generate(),
+                field: 'state',
+                oldValue: gItem.fields['state'],
+                newValue: 'todo',
+            });
+        }
+
+        return undefined;
     }
 }
 

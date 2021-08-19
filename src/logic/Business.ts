@@ -4,6 +4,7 @@ export interface Business {
     removeRelation(data: any);
     getAllItem();
     saveTransaction(transaction: Transaction): void;
+    runGenerators(day: number, weekday: number): Transaction;
 }
 
 export interface Item {
