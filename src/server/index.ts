@@ -8,8 +8,6 @@ import * as https from 'https';
 import { serverContainer } from '../inversify.config';
 import { Business } from '../logic/Business';
 import { TYPES } from '../types';
-import { IdGenerator } from '../logic/idGenerator/IdGenerator';
-import { ActualIdGenerator } from '../logic/idGenerator/ActualIdGenerator';
 
 const business = serverContainer.get<Business>(TYPES.Business);
 
@@ -28,8 +26,6 @@ const server = config.ssl
 
 const io = ioLib(server, { transport: ['websocket'], origins: '*' });
 
-const idGen: IdGenerator = new ActualIdGenerator();
-
 app.get('/', (_, res) => {
     res.send({ hello: 'world' });
 });
@@ -40,6 +36,29 @@ io.origins((origin, callback) => {
     // }
     callback(null, true);
 });
+
+// generators
+let lastDate: Date = new Date();
+let lastHours: number = lastDate.getHours();
+setInterval(
+    () => {
+        const now = new Date();
+        if (lastHours !== now.getHours()) {
+            lastHours = now.getHours();
+            lastDate = now;
+            console.log(lastHours, now.getHours());
+
+            if (lastHours === 8) {
+                const transaction = business.runGenerators(now.getDate(), now.getDay());
+
+                if (transaction) {
+                    io.emit('transaction', transaction);
+                }
+            }
+        }
+    },
+    5 * 1000
+);
 
 io.on('connection', socket => {
     // tslint:disable-next-line: no-console
@@ -71,7 +90,7 @@ io.on('connection', socket => {
 
         const changes = response
             .filter(x => x.response === 'accepted');
-        business.saveTransaction({ id: idGen.generate(), changes });
+        business.saveTransaction({ id: undefined, changes });
 
         const forward = changes
             .map(x => ({ ...x, response: 'happened' }));
