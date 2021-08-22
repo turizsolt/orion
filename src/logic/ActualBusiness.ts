@@ -254,7 +254,6 @@ export class ActualBusiness implements Business {
 
     private applyComplexGenerator(gItem: Item): Change[] {
         const templates = gItem.relations.filter(rel => rel.type === 'template').map(tmp => tmp.otherSideId);
-        console.log('tmp', templates);
         return [].concat(...templates.map(id => this.copyItem(id, gItem.id)));
     }
 
