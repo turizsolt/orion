@@ -217,5 +217,20 @@ function opposite(x: string): string {
             return 'responsibleof';
         case 'responsibleof':
             return 'responsible';
+
+        case 'template':
+            return 'templateof';
+        case 'templateof':
+            return 'template';
+
+        case 'generated':
+            return 'generatedby';
+        case 'generatedby':
+            return 'generated';
+
+        case 'copied':
+            return 'copiedfrom';
+        case 'copiedfrom':
+            return 'copied';
     }
 }
