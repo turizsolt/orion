@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
-import { Business, Change, Item, Transaction } from './Business';
+import { Business, Change, Item, ItemId, Transaction } from './Business';
 import { IdGenerator } from './idGenerator/IdGenerator';
 
 @injectable()
@@ -146,6 +146,57 @@ export class ActualBusiness implements Business {
     }
 
     public runGenerators(day: number, weekday: number): Transaction {
+        const changes = [];
+
+        changes.push(...this.runSimpleGenerators(day, weekday));
+        changes.push(...this.runComplexGenerators(day, weekday));
+
+        return {
+            id: this.idGen.generate(),
+            changes
+        }
+    }
+
+    private runSimpleGenerators(day: number, weekday: number): Change[] {
+        const items = this.persistence.getAll<Item>('item');
+        const generatorItems: Item[] =
+            items.filter(x => x.fields['simpleGenerator']);
+
+        const changes = generatorItems.map(gItem => {
+            try {
+                const json: any[] = JSON.parse(gItem.fields['simpleGenerator']);
+                if (json.length > 0) {
+                    if (json.some(condition => {
+                        let result = false;
+
+                        if (condition.weekday !== undefined) {
+                            if (condition.weekday === weekday) {
+                                result = true;
+                            } else return false;
+                        }
+
+                        if (condition.day !== undefined) {
+                            if (condition.day === day) {
+                                result = true;
+                            } else return false;
+                        }
+
+                        return result;
+                    })) {
+                        return this.applySimpleGenerator(gItem);
+                    }
+                }
+            } catch (e) {
+                return undefined as Change;
+            }
+        }).filter(x => x);
+
+        if (changes.length > 0) {
+            return changes;
+        }
+    }
+
+    private runComplexGenerators(day: number, weekday: number): Change[] {
         const items = this.persistence.getAll<Item>('item');
         const generatorItems: Item[] =
             items.filter(x => x.fields['generator']);
@@ -157,13 +208,13 @@ export class ActualBusiness implements Business {
                     if (json.some(condition => {
                         let result = false;
 
-                        if (condition.weekday) {
+                        if (condition.weekday !== undefined) {
                             if (condition.weekday === weekday) {
                                 result = true;
                             } else return false;
                         }
 
-                        if (condition.day) {
+                        if (condition.day !== undefined) {
                             if (condition.day === day) {
                                 result = true;
                             } else return false;
@@ -171,23 +222,22 @@ export class ActualBusiness implements Business {
 
                         return result;
                     })) {
-                        return this.applyGenerator(gItem);
+                        return this.applyComplexGenerator(gItem);
                     }
                 }
             } catch (e) {
-                return undefined as Change;
+                return [] as Change[];
             }
-        }).filter(x => x);
+        });
+
+        const xChanges = [].concat(...changes).filter(x => x);
 
         if (changes.length > 0) {
-            return {
-                id: this.idGen.generate(),
-                changes
-            }
+            return xChanges;
         }
     }
 
-    private applyGenerator(gItem: Item): Change {
+    private applySimpleGenerator(gItem: Item): Change {
         if (gItem.fields['state'] === 'done') {
             return this.changeItem({
                 type: 'ItemChange',
@@ -200,6 +250,91 @@ export class ActualBusiness implements Business {
         }
 
         return undefined;
+    }
+
+    private applyComplexGenerator(gItem: Item): Change[] {
+        const templates = gItem.relations.filter(rel => rel.type === 'template').map(tmp => tmp.otherSideId);
+        return [].concat(...templates.map(id => this.copyItem(id, gItem.id)));
+    }
+
+    private copyItem(id: ItemId, generatorId: ItemId): Change[] {
+        // todo copied from webclient should create a common method between the two versions
+        const newId: ItemId = this.idGen.generate();
+        const transaction: Change[] = [];
+
+        const storedItem = this.persistence.getOne<Item>('item', id);
+
+        if (storedItem.fields.deleted) return [];
+
+        const change0 = this.changeItem({
+            type: 'ItemChange',
+            itemId: newId,
+            changeId: this.idGen.generate(),
+            field: 'title',
+            oldValue: undefined,
+            newValue: storedItem.fields.title
+        });
+        transaction.push(change0);
+
+        const change1 = this.changeItem({
+            type: 'ItemChange',
+            itemId: newId,
+            changeId: this.idGen.generate(),
+            field: 'generated',
+            oldValue: false,
+            newValue: true
+        });
+        transaction.push(change1);
+
+        for (let fieldKey of Object.keys(storedItem.fields)) {
+            if (fieldKey === 'template') continue;
+            if (fieldKey === 'title') continue;
+
+            const change = this.changeItem({
+                type: 'ItemChange',
+                itemId: newId,
+                changeId: this.idGen.generate(),
+                field: fieldKey,
+                oldValue: undefined,
+                newValue: storedItem.fields[fieldKey]
+            });
+            transaction.push(change);
+        }
+
+        for (let relation of storedItem.relations) {
+            if (['hash', 'responsible', 'parent'].includes(relation.type)) {
+                const change = this.addRelation({
+                    type: 'AddRelation',
+                    oneSideId: newId,
+                    relation: relation.type,
+                    otherSideId: relation.otherSideId,
+                    changeId: this.idGen.generate()
+                });
+                transaction.push(change);
+            }
+        }
+
+        const change2 = this.addRelation({
+            type: 'AddRelation',
+            oneSideId: id,
+            relation: 'copied',
+            otherSideId: newId,
+            changeId: this.idGen.generate(),
+        });
+
+        transaction.push(change2);
+
+        const change3 = this.addRelation({
+            type: 'AddRelation',
+            oneSideId: generatorId,
+            relation: 'generated',
+            otherSideId: newId,
+            changeId: this.idGen.generate(),
+        });
+
+        transaction.push(change3);
+
+        return transaction;
     }
 }
 
@@ -217,5 +352,20 @@ function opposite(x: string): string {
             return 'responsibleof';
         case 'responsibleof':
             return 'responsible';
+
+        case 'template':
+            return 'templateof';
+        case 'templateof':
+            return 'template';
+
+        case 'generated':
+            return 'generatedby';
+        case 'generatedby':
+            return 'generated';
+
+        case 'copied':
+            return 'copiedfrom';
+        case 'copiedfrom':
+            return 'copied';
     }
 }

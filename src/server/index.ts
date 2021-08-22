@@ -9,6 +9,8 @@ import { serverContainer } from '../inversify.config';
 import { Business } from '../logic/Business';
 import { TYPES } from '../types';
 
+const debugGenerator: boolean = false;
+
 const business = serverContainer.get<Business>(TYPES.Business);
 
 const app = express();
@@ -43,21 +45,25 @@ let lastHours: number = lastDate.getHours();
 setInterval(
     () => {
         const now = new Date();
-        if (lastHours !== now.getHours()) {
+        if (lastHours !== now.getHours() || debugGenerator) {
             lastHours = now.getHours();
             lastDate = now;
-            console.log(lastHours, now.getHours());
 
-            if (lastHours === 8) {
+            if (lastHours === 8 || debugGenerator) {
+                // tslint:disable-next-line: no-console
+                console.log('ticked', lastHours);
+
                 const transaction = business.runGenerators(now.getDate(), now.getDay());
 
                 if (transaction) {
+                    // tslint:disable-next-line: no-console
+                    console.log('transaction', transaction);
                     io.emit('transaction', transaction);
                 }
             }
         }
     },
-    5 * 1000
+    debugGenerator ? 5 * 1000 : 5 * 1000
 );
 
 io.on('connection', socket => {
