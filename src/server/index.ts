@@ -52,7 +52,7 @@ setInterval(
             lastHours = now.getHours();
             lastDate = now;
 
-            if (true || lastHours === 8 || debugGenerator) {
+            if (lastHours === 6 || debugGenerator) {
                 lastTicked = now.toISOString();
                 // tslint:disable-next-line: no-console
                 console.log('ticked', lastHours);
