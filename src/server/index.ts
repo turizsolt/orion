@@ -28,8 +28,11 @@ const server = config.ssl
 
 const io = ioLib(server, { transport: ['websocket'], origins: '*' });
 
+const timeStarted = (new Date()).toISOString();
+let lastTicked: string = 'not yet';
+
 app.get('/', (_, res) => {
-    res.send({ hello: 'world' });
+    res.send({ hello: 'world', started: timeStarted, lastTicked });
 });
 
 io.origins((origin, callback) => {
@@ -49,7 +52,8 @@ setInterval(
             lastHours = now.getHours();
             lastDate = now;
 
-            if (lastHours === 8 || debugGenerator) {
+            if (true || lastHours === 8 || debugGenerator) {
+                lastTicked = now.toISOString();
                 // tslint:disable-next-line: no-console
                 console.log('ticked', lastHours);
 
@@ -57,8 +61,11 @@ setInterval(
 
                 if (transaction) {
                     // tslint:disable-next-line: no-console
-                    console.log('transaction', transaction);
-                    io.emit('transaction', transaction);
+                    if (transaction.changes.length > 0) {
+                        business.saveTransaction(transaction);
+                        console.log('transaction', transaction);
+                        io.emit('transaction', transaction);
+                    }
                 }
             }
         }
