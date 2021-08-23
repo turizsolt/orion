@@ -60,9 +60,9 @@ setInterval(
                 const transaction = business.runGenerators(now.getDate(), now.getDay());
 
                 if (transaction) {
-                    // tslint:disable-next-line: no-console
                     if (transaction.changes.length > 0) {
                         business.saveTransaction(transaction);
+                        // tslint:disable-next-line: no-console
                         console.log('transaction', transaction);
                         io.emit('transaction', transaction);
                     }
