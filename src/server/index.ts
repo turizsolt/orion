@@ -28,8 +28,10 @@ const server = config.ssl
 
 const io = ioLib(server, { transport: ['websocket'], origins: '*' });
 
+const timeStarted = (new Date()).toISOString();
+
 app.get('/', (_, res) => {
-    res.send({ hello: 'world' });
+    res.send({ hello: 'world', started: timeStarted });
 });
 
 io.origins((origin, callback) => {
