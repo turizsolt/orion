@@ -125,6 +125,10 @@ io.on('connection', socket => {
         console.log('sending forward', forward);
     });
 
+    socket.on('stillalive', () => {
+        socket.emit('stillalive', {time: (new Date()).getTime()});
+    });
+
     socket.on('disconnect', reason => {
         // tslint:disable-next-line: no-console
         console.log('a user disconnected', reason);
