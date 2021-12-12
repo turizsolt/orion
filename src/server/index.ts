@@ -8,6 +8,7 @@ import * as https from 'https';
 import { serverContainer } from '../inversify.config';
 import { Business } from '../logic/Business';
 import { TYPES } from '../types';
+import { login } from './login';
 
 const debugGenerator: boolean = false;
 
@@ -15,6 +16,7 @@ const business = serverContainer.get<Business>(TYPES.Business);
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const config: any = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
@@ -34,6 +36,8 @@ let lastTicked: string = 'not yet';
 app.get('/', (_, res) => {
     res.send({ hello: 'world', started: timeStarted, lastTicked });
 });
+
+app.post('/login', (req, res) => login(req, res, config));
 
 io.origins((origin, callback) => {
     // if (origin !== 'http://orion.zsiri.eu') {
