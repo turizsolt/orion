@@ -55,6 +55,7 @@
     "lowdb": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "shortid": "^2.2.15",
-    "socket.io": "^2.4.0"
+    "socket.io": "^2.4.0",
+    "socketio-jwt": "^4.6.2"
   }
 }
