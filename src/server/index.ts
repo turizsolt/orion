@@ -17,7 +17,6 @@ const business = serverContainer.get<Business>(TYPES.Business);
 
 const app = express();
 app.use(cors());
-app.use(express.json());
 
 const config: any = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
@@ -38,7 +37,7 @@ app.get('/', (_, res) => {
     res.send({ hello: 'world', started: timeStarted, lastTicked });
 });
 
-app.post('/login', (req, res) => login(req, res, config));
+app.post('/login', express.json(), (req, res) => login(req, res, config));
 
 io.origins((origin, callback) => {
     // if (origin !== 'http://orion.zsiri.eu') {
