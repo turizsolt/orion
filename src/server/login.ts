@@ -10,7 +10,7 @@ export const login = (req, res, config):void => {
         const username = req.body.username;
         if(config.users[username] !== req.body.password) throw 'authentication failed';
 
-        var token = jwt.sign({ username }, config.jwtSecret, { expiresIn: '90 days' });
+        const token = jwt.sign({ username }, config.jwtSecret, { expiresIn: '90 days' });
 
         res.send({ token });
     } catch(e) {
