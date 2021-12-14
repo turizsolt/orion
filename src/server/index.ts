@@ -8,6 +8,8 @@ import * as https from 'https';
 import { serverContainer } from '../inversify.config';
 import { Business } from '../logic/Business';
 import { TYPES } from '../types';
+import { login } from './login';
+import * as socketioJwt from 'socketio-jwt';
 
 const debugGenerator: boolean = false;
 
@@ -15,6 +17,7 @@ const business = serverContainer.get<Business>(TYPES.Business);
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const config: any = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
@@ -34,6 +37,8 @@ let lastTicked: string = 'not yet';
 app.get('/', (_, res) => {
     res.send({ hello: 'world', started: timeStarted, lastTicked });
 });
+
+app.post('/login', (req, res) => login(req, res, config));
 
 io.origins((origin, callback) => {
     // if (origin !== 'http://orion.zsiri.eu') {
@@ -73,13 +78,18 @@ setInterval(
     debugGenerator ? 5 * 1000 : 5 * 1000
 );
 
-io.on('connection', socket => {
-    // tslint:disable-next-line: no-console
-    console.log('a user connected');
+io.on('connection', socketioJwt.authorize({
+    secret: config.jwtSecret,
+    timeout: 15000
+}));
+
+io.on('authenticated', (socket) => {
+    // send all items to the client
     const allItem = business.getAllItem();
+    socket.emit('allItem', allItem);    
+
     // tslint:disable-next-line: no-console
-    console.log('allItem', allItem);
-    socket.emit('allItem', allItem);
+    console.log('a user connected:', socket.decoded_token.username);
 
     socket.on('transaction', (data: any) => {
         // tslint:disable-next-line: no-console
