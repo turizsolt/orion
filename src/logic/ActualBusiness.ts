@@ -153,43 +153,54 @@ export class ActualBusiness implements Business {
 
         return {
             id: this.idGen.generate(),
-            changes
-        }
+            changes,
+        };
     }
 
     private runSimpleGenerators(day: number, weekday: number): Change[] {
         const items = this.persistence.getAll<Item>('item');
-        const generatorItems: Item[] =
-            items.filter(x => x.fields['simpleGenerator']);
+        const generatorItems: Item[] = items.filter(
+            x => x.fields.simpleGenerator,
+        );
 
-        const changes = generatorItems.map(gItem => {
-            try {
-                const json: any[] = JSON.parse(gItem.fields['simpleGenerator']);
-                if (json.length > 0) {
-                    if (json.some(condition => {
-                        let result = false;
+        const changes = generatorItems
+            .map(gItem => {
+                try {
+                    const json: any[] = JSON.parse(
+                        gItem.fields.simpleGenerator,
+                    );
+                    if (json.length > 0) {
+                        if (
+                            json.some(condition => {
+                                let result = false;
 
-                        if (condition.weekday !== undefined) {
-                            if (condition.weekday === weekday) {
-                                result = true;
-                            } else return false;
+                                if (condition.weekday !== undefined) {
+                                    if (condition.weekday === weekday) {
+                                        result = true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+
+                                if (condition.day !== undefined) {
+                                    if (condition.day === day) {
+                                        result = true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+
+                                return result;
+                            })
+                        ) {
+                            return this.applySimpleGenerator(gItem);
                         }
-
-                        if (condition.day !== undefined) {
-                            if (condition.day === day) {
-                                result = true;
-                            } else return false;
-                        }
-
-                        return result;
-                    })) {
-                        return this.applySimpleGenerator(gItem);
                     }
+                } catch (e) {
+                    return undefined as Change;
                 }
-            } catch (e) {
-                return undefined as Change;
-            }
-        }).filter(x => x);
+            })
+            .filter(x => x);
 
         if (changes.length > 0) {
             return changes;
@@ -198,30 +209,35 @@ export class ActualBusiness implements Business {
 
     private runComplexGenerators(day: number, weekday: number): Change[] {
         const items = this.persistence.getAll<Item>('item');
-        const generatorItems: Item[] =
-            items.filter(x => x.fields['generator']);
+        const generatorItems: Item[] = items.filter(x => x.fields.generator);
 
         const changes = generatorItems.map(gItem => {
             try {
-                const json: any[] = JSON.parse(gItem.fields['generator']);
+                const json: any[] = JSON.parse(gItem.fields.generator);
                 if (json.length > 0) {
-                    if (json.some(condition => {
-                        let result = false;
+                    if (
+                        json.some(condition => {
+                            let result = false;
 
-                        if (condition.weekday !== undefined) {
-                            if (condition.weekday === weekday) {
-                                result = true;
-                            } else return false;
-                        }
+                            if (condition.weekday !== undefined) {
+                                if (condition.weekday === weekday) {
+                                    result = true;
+                                } else {
+                                    return false;
+                                }
+                            }
 
-                        if (condition.day !== undefined) {
-                            if (condition.day === day) {
-                                result = true;
-                            } else return false;
-                        }
+                            if (condition.day !== undefined) {
+                                if (condition.day === day) {
+                                    result = true;
+                                } else {
+                                    return false;
+                                }
+                            }
 
-                        return result;
-                    })) {
+                            return result;
+                        })
+                    ) {
                         return this.applyComplexGenerator(gItem);
                     }
                 }
@@ -238,13 +254,13 @@ export class ActualBusiness implements Business {
     }
 
     private applySimpleGenerator(gItem: Item): Change {
-        if (gItem.fields['state'] === 'done') {
+        if (gItem.fields.state === 'done') {
             return this.changeItem({
                 type: 'ItemChange',
                 itemId: gItem.id,
                 changeId: this.idGen.generate(),
                 field: 'state',
-                oldValue: gItem.fields['state'],
+                oldValue: gItem.fields.state,
                 newValue: 'todo',
             });
         }
@@ -253,7 +269,9 @@ export class ActualBusiness implements Business {
     }
 
     private applyComplexGenerator(gItem: Item): Change[] {
-        const templates = gItem.relations.filter(rel => rel.type === 'template').map(tmp => tmp.otherSideId);
+        const templates = gItem.relations
+            .filter(rel => rel.type === 'template')
+            .map(tmp => tmp.otherSideId);
         return [].concat(...templates.map(id => this.copyItem(id, gItem.id)));
     }
 
@@ -264,7 +282,9 @@ export class ActualBusiness implements Business {
 
         const storedItem = this.persistence.getOne<Item>('item', id);
 
-        if (storedItem.fields.deleted) return [];
+        if (storedItem.fields.deleted) {
+            return [];
+        }
 
         const change0 = this.changeItem({
             type: 'ItemChange',
@@ -272,7 +292,7 @@ export class ActualBusiness implements Business {
             changeId: this.idGen.generate(),
             field: 'title',
             oldValue: undefined,
-            newValue: storedItem.fields.title
+            newValue: storedItem.fields.title,
         });
         transaction.push(change0);
 
@@ -282,13 +302,27 @@ export class ActualBusiness implements Business {
             changeId: this.idGen.generate(),
             field: 'generated',
             oldValue: false,
-            newValue: true
+            newValue: true,
         });
         transaction.push(change1);
 
-        for (let fieldKey of Object.keys(storedItem.fields)) {
-            if (fieldKey === 'template') continue;
-            if (fieldKey === 'title') continue;
+        const change1b = this.changeItem({
+            type: 'ItemChange',
+            itemId: newId,
+            changeId: this.idGen.generate(),
+            field: 'due',
+            oldValue: undefined,
+            newValue: new Date().toISOString(),
+        });
+        transaction.push(change1b);
+
+        for (const fieldKey of Object.keys(storedItem.fields)) {
+            if (fieldKey === 'template') {
+                continue;
+            }
+            if (fieldKey === 'title') {
+                continue;
+            }
 
             const change = this.changeItem({
                 type: 'ItemChange',
@@ -296,19 +330,19 @@ export class ActualBusiness implements Business {
                 changeId: this.idGen.generate(),
                 field: fieldKey,
                 oldValue: undefined,
-                newValue: storedItem.fields[fieldKey]
+                newValue: storedItem.fields[fieldKey],
             });
             transaction.push(change);
         }
 
-        for (let relation of storedItem.relations) {
+        for (const relation of storedItem.relations) {
             if (['hash', 'responsible', 'parent'].includes(relation.type)) {
                 const change = this.addRelation({
                     type: 'AddRelation',
                     oneSideId: newId,
                     relation: relation.type,
                     otherSideId: relation.otherSideId,
-                    changeId: this.idGen.generate()
+                    changeId: this.idGen.generate(),
                 });
                 transaction.push(change);
             }
