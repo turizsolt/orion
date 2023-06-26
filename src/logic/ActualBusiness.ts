@@ -84,7 +84,7 @@ export class ActualBusiness implements Business {
     public removeRelation(change: RelationChange) {
         const item1 = this.persistence.getOne<Item>('item', change.oneSideId);
         const item2 = this.persistence.getOne<Item>('item', change.otherSideId);
-
+        
         const index1 = item1.relations.findIndex(
             x =>
                 x.type === change.relation &&
@@ -393,10 +393,10 @@ export class ActualBusiness implements Business {
 
 function opposite(x: string): string {
     switch (x) {
-        case 'children':
+        case 'child':
             return 'parent';
         case 'parent':
-            return 'children';
+            return 'child';
         case 'hash':
             return 'hashof';
         case 'hashof':
