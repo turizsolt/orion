@@ -29,6 +29,7 @@ yarn test
 ## Running server in developer mode
 
 ```bash
+export NODE_OPTIONS=--openssl-legacy-provider
 yarn start:dev
 ```
 

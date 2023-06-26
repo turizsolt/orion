@@ -2,6 +2,7 @@ node_modules/*
 build/*
 coverage/*
 !coverage/.nothing
+backup/*
 .nyc_output/*
 db.json
 config.json
