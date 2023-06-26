@@ -65,7 +65,10 @@ setInterval(
 
                 if (transaction) {
                     if (transaction.changes.length > 0) {
-                        business.saveTransaction(transaction);
+                        transaction.changes.forEach(change => {
+                            change.orderedId = business.getNextChangeOrderedId();
+                            business.saveChange(change);
+                        });
                         // tslint:disable-next-line: no-console
                         console.log('transaction', transaction);
                         io.emit('transaction', transaction);
@@ -90,6 +93,10 @@ io.on('authenticated', (socket) => {
     // tslint:disable-next-line: no-console
     console.log('a user connected:', socket.decoded_token.username);
 
+    socket.on('getLastChanges', ({lastOrderedId}: {lastOrderedId:number}) => {
+        socket.emit('lastChanges',business.getLastChanges(lastOrderedId));
+    });
+
     socket.on('transaction', (data: any) => {
         // tslint:disable-next-line: no-console
         console.log('transactionReceived', data.transactionId);
@@ -112,8 +119,7 @@ io.on('authenticated', (socket) => {
 
         const changes = response
             .filter(x => x.response === 'accepted');
-        business.saveTransaction({ id: undefined, changes });
-
+        
         const forward = changes
             .map(x => ({ ...x, response: 'happened' }));
 

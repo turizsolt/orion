@@ -1,7 +1,6 @@
 // tslint:disable: no-var-requires
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
-const httpErrors = require('http-errors');
 
 const adapter = new FileSync(__dirname + '/db.json');
 const db = low(adapter);
@@ -50,5 +49,9 @@ export class JsonFilePersistence implements Persistence {
             .get(collectionName)
             .filter(filter)
             .value();
+    }
+
+    public getNextId(collectionName: string): number {
+        return db.get(collectionName).value().length;
     }
 }

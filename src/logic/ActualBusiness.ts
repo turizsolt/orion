@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Persistence } from '../persistence/Persistence';
 import { TYPES } from '../types';
-import { Business, Change, Item, ItemId, Transaction } from './Business';
+import { Business, Change, Item, ItemChange, ItemId, RelationChange, Transaction } from './Business';
 import { IdGenerator } from './idGenerator/IdGenerator';
 
 @injectable()
@@ -9,7 +9,7 @@ export class ActualBusiness implements Business {
     @inject(TYPES.Persistence) private persistence: Persistence;
     @inject(TYPES.IdGenerator) private idGen: IdGenerator;
 
-    public changeItem(change: any) {
+    public changeItem(change: ItemChange) {
         const storedItem = this.persistence.getOne<Item>('item', change.itemId);
         const item: any = storedItem || {
             id: change.itemId,
@@ -23,6 +23,10 @@ export class ActualBusiness implements Business {
         ) {
             item.fields[change.field] = change.newValue;
             this.persistence.update<Item>('item', item.id, item);
+
+            change.orderedId = this.persistence.getNextId('change');
+            this.persistence.save<Change>('change', change);
+
             return { ...change, response: 'accepted' };
         } else {
             return {
@@ -33,7 +37,7 @@ export class ActualBusiness implements Business {
         }
     }
 
-    public addRelation(change: any) {
+    public addRelation(change: RelationChange) {
         const item1 = this.persistence.getOne<Item>('item', change.oneSideId);
         const item2 = this.persistence.getOne<Item>('item', change.otherSideId);
         if (!item1.relations) {
@@ -64,6 +68,9 @@ export class ActualBusiness implements Business {
 
             this.persistence.update<Item>('item', item1.id, item1);
             this.persistence.update<Item>('item', item2.id, item2);
+            
+            change.orderedId = this.persistence.getNextId('change');
+            this.persistence.save<Change>('change', change);
             return { ...change, response: 'accepted' };
         }
 
@@ -74,7 +81,7 @@ export class ActualBusiness implements Business {
         // todo handle error somehow
     }
 
-    public removeRelation(change: any) {
+    public removeRelation(change: RelationChange) {
         const item1 = this.persistence.getOne<Item>('item', change.oneSideId);
         const item2 = this.persistence.getOne<Item>('item', change.otherSideId);
 
@@ -99,15 +106,17 @@ export class ActualBusiness implements Business {
             this.persistence.update<Item>('item', item1.id, item1);
             this.persistence.update<Item>('item', item2.id, item2);
 
+            change.orderedId = this.persistence.getNextId('change');
+            this.persistence.save<Change>('change', change);
+
             return { ...change, response: 'accepted' };
         }
 
         // todo handle error somehow
     }
 
-    public saveTransaction(transaction: Transaction): void {
-        transaction.id = this.idGen.generate();
-        this.persistence.save<Transaction>('transaction', transaction);
+    public saveChange(change: Change): void {
+        this.persistence.save<Change>('change', change);
     }
 
     public getAllItem() {
@@ -143,6 +152,16 @@ export class ActualBusiness implements Business {
             transactionId: undefined,
             changes: itemChanges.concat(relChanges),
         };
+    }
+
+    public getLastChanges(lastOrderedId: number): Change[] {
+        return this.persistence
+            .getFiltered('change', (change:Change) => change.orderedId >= lastOrderedId)
+            .map((change:Change) => ({...change, response: 'accepted'}));
+    }
+
+    public getNextChangeOrderedId():number {
+        return this.persistence.getNextId('change');
     }
 
     public runGenerators(day: number, weekday: number): Transaction {

@@ -3,8 +3,10 @@ export interface Business {
     addRelation(data: any);
     removeRelation(data: any);
     getAllItem();
-    saveTransaction(transaction: Transaction): void;
+    getLastChanges(lastOrderedId: number): Change[];
+    saveChange(change: Change): void;
     runGenerators(day: number, weekday: number): Transaction;
+    getNextChangeOrderedId():number;
 }
 
 export interface Item {
@@ -19,10 +21,24 @@ export interface Relation {
     deleted?: boolean;
 }
 
-export interface Change {
+export type Change = ItemChange | RelationChange;
+export interface ItemChange {
+    orderedId?: number;
+    changeId: string;
+    type: 'ItemChange';
+    itemId: ItemId;
     field: string;
     oldValue: any;
     newValue: any;
+}
+
+export interface RelationChange {
+    orderedId?: number;
+    changeId: string;
+    type: 'AddRelation' | 'RemoveRelation';
+    relation: string;
+    oneSideId: ItemId;
+    otherSideId: ItemId;
 }
 
 export interface Transaction {

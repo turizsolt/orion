@@ -1,9 +1,8 @@
 // tslint:disable: no-var-requires
 import { injectable } from 'inversify';
 import { Persistence } from './Persistence';
-const httpErrors = require('http-errors');
 
-const db = { item: [], transaction: [] };
+const db = { item: [], change: [] };
 
 @injectable()
 export class InMemoryPersistence implements Persistence {
@@ -37,5 +36,9 @@ export class InMemoryPersistence implements Persistence {
             }
             return true;
         });
+    }
+
+    public getNextId(collectionName: string): number {
+        return db[collectionName].length;
     }
 }

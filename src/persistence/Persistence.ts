@@ -4,4 +4,5 @@ export interface Persistence {
     getOne<Record>(collectionName: string, id: string): Record;
     getAll<Record>(collectionName: string): Record[];
     getFiltered<Record>(collectionName: string, filter: any): Record[];
+    getNextId(collectionName: string): number;
 }
